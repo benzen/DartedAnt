@@ -1,3 +1,6 @@
+#source('Board.dart');
+#source('DartedAnter.dart');
+#source('Starter.dart');
 class Ant extends Isolate {
   int x,y;
   Board board;
