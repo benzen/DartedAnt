@@ -1,18 +1,12 @@
 class Starter extends Isolate{
-    ReceivePort _receivePort;
-     
-        Starter.start() :
-            _receivePort = new ReceivePort() {
-                this._receivePort.receive(
-                    void _(var message, SendPort replyTo) {
-                        print ("Receiving from Worker: ${message}");
-                        _receivePort.close();
-                    }
-                );
-     
-                Ant ant = new Ant();
-                ant.spawn().then((SendPort port) {
-                    port.send('Ping', _receivePort.toSendPort());
-            });
-        }
-    }
+  main() {
+    port.receive((message, replyTo) {
+    if (message == null) port.close();
+    else appendMessage(message);
+    });
+ }
+  void appendMessage(String message) {
+    // the HTML library defines a global "document" variable
+    document.query('#status').innerHTML += "<br> $message";
+  }
+}

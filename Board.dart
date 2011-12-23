@@ -17,7 +17,7 @@ class Board extends Isolate{
         this.cases[key]=0;
       }
       Ant ant = new Ant(this);
-      ant.start();
+      ant.main();
     }
     
   }
@@ -32,5 +32,8 @@ class Board extends Isolate{
     } else if( ( this.anthillX == x) &&( this.anthillY == y) ){
       return "anthill";
     }else return "nothing";
+  }
+  void main(){
+    
   }
 }
