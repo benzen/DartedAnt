@@ -1,4 +1,4 @@
-  class Starter extends Isolate{
+class Starter extends Isolate{
     ReceivePort _receivePort;
      
         Starter.start() :

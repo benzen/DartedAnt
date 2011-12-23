@@ -33,4 +33,4 @@ class Board extends Isolate{
       return "anthill";
     }else return "nothing";
   }
-
+}
