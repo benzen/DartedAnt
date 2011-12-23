@@ -642,6 +642,7 @@ function isolate$deserializeMessage(message) {
     return message;
   }
 }
+function native_MathNatives_random() { return Math.random(); }
 function native_NumberImplementation_BIT_XOR(other) {
   "use strict";
   return this ^ other;
@@ -698,6 +699,18 @@ function native_NumberImplementation_EQ(other) {
 function native_NumberImplementation_negate() {
   "use strict";
   return -this;
+}
+function native_NumberImplementation_truncate() {
+  "use strict";
+  return (this < 0) ? Math.ceil(this) : Math.floor(this);
+}
+function native_NumberImplementation_isNaN() {
+  "use strict";
+  return isNaN(this);
+}
+function native_NumberImplementation_isInfinite() {
+  "use strict";
+  return (this == Infinity) || (this == -Infinity);
 }
 function native_NumberImplementation_toDouble() {
   "use strict";
@@ -828,6 +841,9 @@ function $cls(cls) {
 }
 function $isBool(o) {
   return typeof o == 'boolean';
+}
+function $isNum(o) {
+  return typeof o == 'number';
 }
 function $isString(o) {
   return typeof o == 'string';
@@ -2160,6 +2176,12 @@ Deserializer$Dart._jsArrayLength$$member_ = function(x){
   return native_Deserializer__jsArrayLength(x);
 }
 ;
+function MathNatives$Dart(){
+}
+MathNatives$Dart.random$member = function(){
+  return native_MathNatives_random();
+}
+;
 Number.$lookupRTT = function(){
   return RTT.create($cls('Number'), Number.$RTTimplements);
 }
@@ -2226,6 +2248,38 @@ Number.prototype.GT$operator = function(other){
 ;
 Number.prototype.GTE$operator = function(other){
   return native_NumberImplementation_GTE.call(this, other);
+}
+;
+Number.prototype.truncate$member = function(){
+  return native_NumberImplementation_truncate.call(this);
+}
+;
+Number.prototype.isNaN$member = function(){
+  return native_NumberImplementation_isNaN.call(this);
+}
+;
+Number.prototype.isInfinite$member = function(){
+  return native_NumberImplementation_isInfinite.call(this);
+}
+;
+Number.prototype.toInt$member = function(){
+  if (this.isNaN$member()) {
+    $Dart$ThrowException(BadNumberFormatException$Dart.BadNumberFormatException$$Factory('NaN'));
+  }
+  if (this.isInfinite$member()) {
+    $Dart$ThrowException(BadNumberFormatException$Dart.BadNumberFormatException$$Factory('Infinity'));
+  }
+  var truncated = this.truncate$member();
+  if (EQ$operator(truncated, negate$operator(0))) {
+    return 0;
+  }
+  return truncated;
+}
+;
+Number.prototype.toInt$named = function($n, $o){
+  if ($o.count || $n != 0)
+    $nsme();
+  return Number.prototype.toInt$member.call(this);
 }
 ;
 Number.prototype.toDouble$member = function(){
@@ -2712,21 +2766,6 @@ FutureImpl$Dart.prototype.hasValue$getter = function(){
   return this.isComplete$getter() && this._exception$$getter_() == null;
 }
 ;
-FutureImpl$Dart.prototype.then$member = function(onComplete){
-  if (this.hasValue$getter()) {
-    onComplete(1, $noargs, this.value$getter());
-  }
-   else {
-    this._listeners$$getter_().add$named(1, $noargs, onComplete);
-  }
-}
-;
-FutureImpl$Dart.prototype.then$named = function($n, $o, onComplete){
-  if ($o.count || $n != 1)
-    $nsme();
-  return FutureImpl$Dart.prototype.then$member.call(this, onComplete);
-}
-;
 FutureImpl$Dart.prototype._complete$$member_ = function(){
   var tmp$1, tmp$0;
   this._isComplete$$setter_(tmp$0 = true) , tmp$0;
@@ -3070,6 +3109,26 @@ HashMapImplementation$Dart.prototype.INDEX$operator = function(key){
     return $Dart$Null;
   }
   return this._values$$getter_().INDEX$operator(index);
+}
+;
+HashMapImplementation$Dart.prototype.remove$member = function(key){
+  var tmp$5, tmp$1, tmp$2, tmp$3, tmp$4, tmp$0;
+  var index = this._probeForLookup$$member_(key);
+  if (GTE$operator(index, 0)) {
+    tmp$0 = this._numberOfEntries$$getter_() , (this._numberOfEntries$$setter_(tmp$1 = SUB$operator(tmp$0, 1)) , tmp$1 , tmp$0);
+    var value = this._values$$getter_().INDEX$operator(index);
+    this._values$$getter_().ASSIGN_INDEX$operator(index, tmp$2 = $Dart$Null) , tmp$2;
+    this._keys$$getter_().ASSIGN_INDEX$operator(index, tmp$3 = HashMapImplementation$Dart._DELETED_KEY$$getter_()) , tmp$3;
+    tmp$4 = this._numberOfDeleted$$getter_() , (this._numberOfDeleted$$setter_(tmp$5 = ADD$operator(tmp$4, 1)) , tmp$5 , tmp$4);
+    return value;
+  }
+  return $Dart$Null;
+}
+;
+HashMapImplementation$Dart.prototype.remove$named = function($n, $o, key){
+  if ($o.count || $n != 1)
+    $nsme();
+  return HashMapImplementation$Dart.prototype.remove$member.call(this, key);
 }
 ;
 HashMapImplementation$Dart.prototype.isEmpty$member = function(){
@@ -3454,6 +3513,55 @@ IllegalArgumentException$Dart.prototype.$const_id = function(){
   return $cls('IllegalArgumentException$Dart') + (':' + $dart_const_id(this._args$$field_));
 }
 ;
+function BadNumberFormatException$Dart(){
+}
+BadNumberFormatException$Dart.$lookupRTT = function(){
+  return RTT.create($cls('BadNumberFormatException$Dart'), BadNumberFormatException$Dart.$RTTimplements);
+}
+;
+BadNumberFormatException$Dart.$RTTimplements = function(rtt){
+  BadNumberFormatException$Dart.$addTo(rtt);
+}
+;
+BadNumberFormatException$Dart.$addTo = function(target){
+  var rtt = BadNumberFormatException$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  Exception$Dart.$addTo(target);
+}
+;
+BadNumberFormatException$Dart.$Constructor = function(_s){
+}
+;
+BadNumberFormatException$Dart.$Initializer = function(_s){
+  this._s$$field_ = _s;
+}
+;
+BadNumberFormatException$Dart.BadNumberFormatException$$Factory = function(_s){
+  var tmp$0 = new BadNumberFormatException$Dart;
+  tmp$0.$typeInfo = BadNumberFormatException$Dart.$lookupRTT();
+  BadNumberFormatException$Dart.$Initializer.call(tmp$0, _s);
+  BadNumberFormatException$Dart.$Constructor.call(tmp$0, _s);
+  return tmp$0;
+}
+;
+BadNumberFormatException$Dart.prototype.toString$member = function(){
+  return "BadNumberFormatException: '" + $toString(this._s$$getter_()) + "'";
+}
+;
+BadNumberFormatException$Dart.prototype.toString$named = function($n, $o){
+  if ($o.count || $n != 0)
+    $nsme();
+  return BadNumberFormatException$Dart.prototype.toString$member.call(this);
+}
+;
+BadNumberFormatException$Dart.prototype._s$$getter_ = function(){
+  return this._s$$field_;
+}
+;
+BadNumberFormatException$Dart.prototype.$const_id = function(){
+  return $cls('BadNumberFormatException$Dart') + (':' + $dart_const_id(this._s$$field_));
+}
+;
 function NoMoreElementsException$Dart(){
 }
 NoMoreElementsException$Dart.$lookupRTT = function(){
@@ -3773,6 +3881,12 @@ HashMap$Dart.$addTo = function(target, typeArgs){
   Map$Dart.$addTo(target, [RTT.getTypeArg(target.typeArgs, 0), RTT.getTypeArg(target.typeArgs, 1)]);
 }
 ;
+function Math$Dart(){
+}
+Math$Dart.random$member = function(){
+  return MathNatives$Dart.random$member();
+}
+;
 function num$Dart(){
 }
 num$Dart.$lookupRTT = function(){
@@ -3900,6 +4014,13 @@ function native__CharacterDataWrappingImplementation__get_length(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__ClientRectWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__ClientRectListWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
@@ -3959,6 +4080,13 @@ function native__DOMTokenListWrappingImplementation__get_length(_this) {
 function native__DOMTokenListWrappingImplementation__add(_this, token) {
   try {
     return __dom_wrap(_this.$dom.add(__dom_unwrap(token)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__DOMTokenListWrappingImplementation__remove(_this, token) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(token)));
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4068,6 +4196,27 @@ function native__ElementWrappingImplementation__querySelector(_this, selectors) 
     throw __dom_wrap_exception(e);
   }
 }
+function native__EntryWrappingImplementation__remove(_this) {
+  try {
+    return __dom_wrap(_this.$dom.remove());
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__EntryWrappingImplementation__remove_2(_this, successCallback) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(successCallback)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__EntryWrappingImplementation__remove_3(_this, successCallback, errorCallback) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(successCallback), __dom_unwrap(errorCallback)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__EntryArrayWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
@@ -4078,6 +4227,13 @@ function native__EntryArrayWrappingImplementation__get_length(_this) {
 function native__EntryArraySyncWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__EntrySyncWrappingImplementation__remove(_this) {
+  try {
+    return __dom_wrap(_this.$dom.remove());
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4117,9 +4273,9 @@ function native__FileWriterWrappingImplementation__get_length(_this) {
     throw __dom_wrap_exception(e);
   }
 }
-function native__FileWriterWrappingImplementation__write(_this, data) {
+function native__FileWriterWrappingImplementation__truncate(_this, size) {
   try {
-    return __dom_wrap(_this.$dom.write(__dom_unwrap(data)));
+    return __dom_wrap(_this.$dom.truncate(__dom_unwrap(size)));
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4131,9 +4287,9 @@ function native__FileWriterSyncWrappingImplementation__get_length(_this) {
     throw __dom_wrap_exception(e);
   }
 }
-function native__FileWriterSyncWrappingImplementation__write(_this, data) {
+function native__FileWriterSyncWrappingImplementation__truncate(_this, size) {
   try {
-    return __dom_wrap(_this.$dom.write(__dom_unwrap(data)));
+    return __dom_wrap(_this.$dom.truncate(__dom_unwrap(size)));
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4201,6 +4357,13 @@ function native__HTMLAnchorElementWrappingImplementation__toString(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLAppletElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLAreaElementWrappingImplementation__get_port(_this) {
   try {
     return __dom_wrap(_this.$dom.port);
@@ -4222,6 +4385,13 @@ function native__HTMLButtonElementWrappingImplementation__get_value(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLCanvasElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLCollectionWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
@@ -4232,6 +4402,13 @@ function native__HTMLCollectionWrappingImplementation__get_length(_this) {
 function native__HTMLCollectionWrappingImplementation__index(_this, index) {
   try {
     return __dom_wrap(_this.$dom[index]);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLDocumentWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4250,13 +4427,6 @@ function native__HTMLDocumentWrappingImplementation__close(_this) {
     throw __dom_wrap_exception(e);
   }
 }
-function native__HTMLDocumentWrappingImplementation__write(_this, text) {
-  try {
-    return __dom_wrap(_this.$dom.write(__dom_unwrap(text)));
-  } catch (e) {
-    throw __dom_wrap_exception(e);
-  }
-}
 function native__HTMLElementWrappingImplementation__get_innerHTML(_this) {
   try {
     return __dom_wrap(_this.$dom.innerHTML);
@@ -4271,6 +4441,13 @@ function native__HTMLElementWrappingImplementation__set_innerHTML(_this, value) 
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLEmbedElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLFormElementWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
@@ -4278,9 +4455,44 @@ function native__HTMLFormElementWrappingImplementation__get_length(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLFrameElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLIFrameElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLImageElementWrappingImplementation__get_complete(_this) {
   try {
     return __dom_wrap(_this.$dom.complete);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLImageElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLImageElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLImageElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4299,9 +4511,23 @@ function native__HTMLLIElementWrappingImplementation__get_value(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLMarqueeElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLMeterElementWrappingImplementation__get_value(_this) {
   try {
     return __dom_wrap(_this.$dom.value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLObjectElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4323,6 +4549,13 @@ function native__HTMLOptionsCollectionWrappingImplementation__get_length_HTMLOpt
 function native__HTMLOptionsCollectionWrappingImplementation__set_length_HTMLOptionsCollection(_this, value) {
   try {
     _this.$dom.length = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLOptionsCollectionWrappingImplementation__remove(_this, index) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(index)));
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4376,9 +4609,37 @@ function native__HTMLSelectElementWrappingImplementation__add(_this, element, be
     throw __dom_wrap_exception(e);
   }
 }
+function native__HTMLSelectElementWrappingImplementation__remove(_this, index_OR_option) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(index_OR_option)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLSelectElementWrappingImplementation__remove_2(_this, index_OR_option) {
+  try {
+    return __dom_wrap(_this.$dom.remove(__dom_unwrap(index_OR_option)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLTableCellElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__HTMLTextAreaElementWrappingImplementation__get_value(_this) {
   try {
     return __dom_wrap(_this.$dom.value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__HTMLVideoElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4435,6 +4696,13 @@ function native__IDBObjectStoreWrappingImplementation__clear(_this) {
 function native__IDBObjectStoreWrappingImplementation__index(_this, name) {
   try {
     return __dom_wrap(_this.$dom.index(__dom_unwrap(name)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__ImageDataWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4544,6 +4812,20 @@ function native__MessagePortWrappingImplementation__close(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__MouseEventWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__MouseEventWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__NamedNodeMapWrappingImplementation__get_length(_this) {
   try {
     return __dom_wrap(_this.$dom.length);
@@ -4568,6 +4850,13 @@ function native__NodeWrappingImplementation__get_ownerDocument(_this) {
 function native__NodeWrappingImplementation__get_parentNode(_this) {
   try {
     return __dom_wrap(_this.$dom.parentNode);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__NodeWrappingImplementation__removeChild(_this, oldChild) {
+  try {
+    return __dom_wrap(_this.$dom.removeChild(__dom_unwrap(oldChild)));
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4628,6 +4917,20 @@ function native__SVGAngleWrappingImplementation__get_value(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__SVGCursorElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGCursorElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__SVGDocumentWrappingImplementation__get_rootElement(_this) {
   try {
     return __dom_wrap(_this.$dom.rootElement);
@@ -4656,6 +4959,503 @@ function native__SVGExceptionWrappingImplementation__toString(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__SVGFEBlendElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEBlendElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEBlendElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEColorMatrixElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEColorMatrixElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEColorMatrixElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEComponentTransferElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEComponentTransferElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEComponentTransferElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFECompositeElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFECompositeElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFECompositeElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEConvolveMatrixElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEConvolveMatrixElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEConvolveMatrixElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDiffuseLightingElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDiffuseLightingElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDiffuseLightingElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDisplacementMapElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDisplacementMapElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDisplacementMapElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDropShadowElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDropShadowElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEDropShadowElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEFloodElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEFloodElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEFloodElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEGaussianBlurElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEGaussianBlurElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEGaussianBlurElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEImageElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEImageElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEImageElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMergeElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMergeElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMergeElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMorphologyElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMorphologyElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEMorphologyElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEOffsetElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEOffsetElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEOffsetElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEPointLightElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFEPointLightElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFESpecularLightingElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFESpecularLightingElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFESpecularLightingElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFESpotLightElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFESpotLightElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETileElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETileElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETileElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETurbulenceElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETurbulenceElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFETurbulenceElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGForeignObjectElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGForeignObjectElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGForeignObjectElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGGlyphRefElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGGlyphRefElementWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGGlyphRefElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGGlyphRefElementWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGImageElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGImageElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGImageElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__SVGLengthWrappingImplementation__get_value(_this) {
   try {
     return __dom_wrap(_this.$dom.value);
@@ -4666,6 +5466,27 @@ function native__SVGLengthWrappingImplementation__get_value(_this) {
 function native__SVGLengthListWrappingImplementation__clear(_this) {
   try {
     return __dom_wrap(_this.$dom.clear());
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGMaskElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGMaskElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGMaskElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4684,9 +5505,506 @@ function native__SVGNumberListWrappingImplementation__clear(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__SVGPathSegArcAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegArcRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoHorizontalAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoHorizontalAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoHorizontalRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoHorizontalRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoVerticalAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoVerticalAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoVerticalRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegLinetoVerticalRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__SVGPathSegListWrappingImplementation__clear(_this) {
   try {
     return __dom_wrap(_this.$dom.clear());
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoAbsWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoAbsWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoAbsWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoAbsWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoRelWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoRelWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoRelWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPathSegMovetoRelWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPatternElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPatternElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPatternElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPointWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPointWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPointWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGPointWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4698,6 +6016,83 @@ function native__SVGPointListWrappingImplementation__clear(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__SVGRectWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGRectElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGSVGElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGSVGElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGSVGElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__SVGStringListWrappingImplementation__clear(_this) {
   try {
     return __dom_wrap(_this.$dom.clear());
@@ -4705,9 +6100,51 @@ function native__SVGStringListWrappingImplementation__clear(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__SVGTextPositioningElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGTextPositioningElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__SVGTransformListWrappingImplementation__clear(_this) {
   try {
     return __dom_wrap(_this.$dom.clear());
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGUseElementWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGUseElementWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__SVGUseElementWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__ScreenWrappingImplementation__get_height(_this) {
+  try {
+    return __dom_wrap(_this.$dom.height);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -4873,6 +6310,34 @@ function native__WebKitCSSMatrixWrappingImplementation__toString(_this) {
     throw __dom_wrap_exception(e);
   }
 }
+function native__WebKitPointWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__WebKitPointWrappingImplementation__set_x(_this, value) {
+  try {
+    _this.$dom.x = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__WebKitPointWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__WebKitPointWrappingImplementation__set_y(_this, value) {
+  try {
+    _this.$dom.y = __dom_unwrap(value);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
 function native__WebSocketWrappingImplementation__close(_this) {
   try {
     return __dom_wrap(_this.$dom.close());
@@ -4897,6 +6362,20 @@ function native__WebSocketWrappingImplementation__close_3(_this, code, reason) {
 function native__WebSocketWrappingImplementation__send(_this, data) {
   try {
     return __dom_wrap(_this.$dom.send(__dom_unwrap(data)));
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__WheelEventWrappingImplementation__get_x(_this) {
+  try {
+    return __dom_wrap(_this.$dom.x);
+  } catch (e) {
+    throw __dom_wrap_exception(e);
+  }
+}
+function native__WheelEventWrappingImplementation__get_y(_this) {
+  try {
+    return __dom_wrap(_this.$dom.y);
   } catch (e) {
     throw __dom_wrap_exception(e);
   }
@@ -16517,6 +17996,14 @@ _ClientRectWrappingImplementation$Dart.create__ClientRectWrappingImplementation$
 function native__ClientRectWrappingImplementation_create__ClientRectWrappingImplementation(){
   return _ClientRectWrappingImplementation$Dart.create__ClientRectWrappingImplementation$member();
 }
+_ClientRectWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _ClientRectWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_ClientRectWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__ClientRectWrappingImplementation__get_height(_this);
+}
+;
 _ClientRectWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'ClientRect';
 }
@@ -17448,6 +18935,21 @@ _DOMTokenListWrappingImplementation$Dart._add$$member_ = function(receiver, toke
   return native__DOMTokenListWrappingImplementation__add(receiver, token);
 }
 ;
+_DOMTokenListWrappingImplementation$Dart.prototype.remove$member = function(token){
+  _DOMTokenListWrappingImplementation$Dart._remove$$member_(this, token);
+  return;
+}
+;
+_DOMTokenListWrappingImplementation$Dart.prototype.remove$named = function($n, $o, token){
+  if ($o.count || $n != 1)
+    $nsme();
+  return _DOMTokenListWrappingImplementation$Dart.prototype.remove$member.call(this, token);
+}
+;
+_DOMTokenListWrappingImplementation$Dart._remove$$member_ = function(receiver, token){
+  return native__DOMTokenListWrappingImplementation__remove(receiver, token);
+}
+;
 _DOMTokenListWrappingImplementation$Dart.prototype.toString$member = function(){
   return _DOMTokenListWrappingImplementation$Dart._toString$$member_(this);
 }
@@ -18367,6 +19869,21 @@ _EntrySyncWrappingImplementation$Dart.create__EntrySyncWrappingImplementation$me
 function native__EntrySyncWrappingImplementation_create__EntrySyncWrappingImplementation(){
   return _EntrySyncWrappingImplementation$Dart.create__EntrySyncWrappingImplementation$member();
 }
+_EntrySyncWrappingImplementation$Dart.prototype.remove$member = function(){
+  _EntrySyncWrappingImplementation$Dart._remove$$member_(this);
+  return;
+}
+;
+_EntrySyncWrappingImplementation$Dart.prototype.remove$named = function($n, $o){
+  if ($o.count || $n != 0)
+    $nsme();
+  return _EntrySyncWrappingImplementation$Dart.prototype.remove$member.call(this);
+}
+;
+_EntrySyncWrappingImplementation$Dart._remove$$member_ = function(receiver){
+  return native__EntrySyncWrappingImplementation__remove(receiver);
+}
+;
 _EntrySyncWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'EntrySync';
 }
@@ -18457,6 +19974,52 @@ _EntryWrappingImplementation$Dart.create__EntryWrappingImplementation$member = f
 function native__EntryWrappingImplementation_create__EntryWrappingImplementation(){
   return _EntryWrappingImplementation$Dart.create__EntryWrappingImplementation$member();
 }
+_EntryWrappingImplementation$Dart.prototype.remove$member = function(successCallback, errorCallback){
+  if (successCallback == null) {
+    if (errorCallback == null) {
+      _EntryWrappingImplementation$Dart._remove$$member_(this);
+      return;
+    }
+  }
+   else {
+    if (errorCallback == null) {
+      _EntryWrappingImplementation$Dart._remove_2$$member_(this, successCallback);
+      return;
+    }
+     else {
+      _EntryWrappingImplementation$Dart._remove_3$$member_(this, successCallback, errorCallback);
+      return;
+    }
+  }
+  $Dart$ThrowException('Incorrect number or type of arguments');
+}
+;
+_EntryWrappingImplementation$Dart.prototype.remove$named = function($n, $o, successCallback, errorCallback){
+  var seen = 0;
+  var def = 0;
+  switch ($n) {
+    case 0:
+      successCallback = '$p_successCallback' in $o?(++seen , $o.$p_successCallback):(++def , $Dart$Null);
+    case 1:
+      errorCallback = '$p_errorCallback' in $o?(++seen , $o.$p_errorCallback):(++def , $Dart$Null);
+  }
+  if (seen != $o.count || seen + def + $n != 2)
+    $nsme();
+  return _EntryWrappingImplementation$Dart.prototype.remove$member.call(this, successCallback, errorCallback);
+}
+;
+_EntryWrappingImplementation$Dart._remove$$member_ = function(receiver){
+  return native__EntryWrappingImplementation__remove(receiver);
+}
+;
+_EntryWrappingImplementation$Dart._remove_2$$member_ = function(receiver, successCallback){
+  return native__EntryWrappingImplementation__remove_2(receiver, successCallback);
+}
+;
+_EntryWrappingImplementation$Dart._remove_3$$member_ = function(receiver, successCallback, errorCallback){
+  return native__EntryWrappingImplementation__remove_3(receiver, successCallback, errorCallback);
+}
+;
 _EntryWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'Entry';
 }
@@ -19462,13 +21025,13 @@ _FileWriterSyncWrappingImplementation$Dart._get_length$$member_ = function(_this
   return native__FileWriterSyncWrappingImplementation__get_length(_this);
 }
 ;
-_FileWriterSyncWrappingImplementation$Dart.prototype.write$member = function(data){
-  _FileWriterSyncWrappingImplementation$Dart._write$$member_(this, data);
+_FileWriterSyncWrappingImplementation$Dart.prototype.truncate$member = function(size){
+  _FileWriterSyncWrappingImplementation$Dart._truncate$$member_(this, size);
   return;
 }
 ;
-_FileWriterSyncWrappingImplementation$Dart._write$$member_ = function(receiver, data){
-  return native__FileWriterSyncWrappingImplementation__write(receiver, data);
+_FileWriterSyncWrappingImplementation$Dart._truncate$$member_ = function(receiver, size){
+  return native__FileWriterSyncWrappingImplementation__truncate(receiver, size);
 }
 ;
 _FileWriterSyncWrappingImplementation$Dart.prototype.typeName$getter = function(){
@@ -19524,13 +21087,13 @@ _FileWriterWrappingImplementation$Dart._get_length$$member_ = function(_this){
   return native__FileWriterWrappingImplementation__get_length(_this);
 }
 ;
-_FileWriterWrappingImplementation$Dart.prototype.write$member = function(data){
-  _FileWriterWrappingImplementation$Dart._write$$member_(this, data);
+_FileWriterWrappingImplementation$Dart.prototype.truncate$member = function(size){
+  _FileWriterWrappingImplementation$Dart._truncate$$member_(this, size);
   return;
 }
 ;
-_FileWriterWrappingImplementation$Dart._write$$member_ = function(receiver, data){
-  return native__FileWriterWrappingImplementation__write(receiver, data);
+_FileWriterWrappingImplementation$Dart._truncate$$member_ = function(receiver, size){
+  return native__FileWriterWrappingImplementation__truncate(receiver, size);
 }
 ;
 _FileWriterWrappingImplementation$Dart.prototype.typeName$getter = function(){
@@ -20152,6 +21715,21 @@ _HTMLOptionsCollectionWrappingImplementation$Dart._get_length_HTMLOptionsCollect
 ;
 _HTMLOptionsCollectionWrappingImplementation$Dart._set_length_HTMLOptionsCollection$$member_ = function(_this, value){
   return native__HTMLOptionsCollectionWrappingImplementation__set_length_HTMLOptionsCollection(_this, value);
+}
+;
+_HTMLOptionsCollectionWrappingImplementation$Dart.prototype.remove$member = function(index){
+  _HTMLOptionsCollectionWrappingImplementation$Dart._remove$$member_(this, index);
+  return;
+}
+;
+_HTMLOptionsCollectionWrappingImplementation$Dart.prototype.remove$named = function($n, $o, index){
+  if ($o.count || $n != 1)
+    $nsme();
+  return _HTMLOptionsCollectionWrappingImplementation$Dart.prototype.remove$member.call(this, index);
+}
+;
+_HTMLOptionsCollectionWrappingImplementation$Dart._remove$$member_ = function(receiver, index){
+  return native__HTMLOptionsCollectionWrappingImplementation__remove(receiver, index);
 }
 ;
 _HTMLOptionsCollectionWrappingImplementation$Dart.prototype.typeName$getter = function(){
@@ -21121,6 +22699,14 @@ _ImageDataWrappingImplementation$Dart.create__ImageDataWrappingImplementation$me
 function native__ImageDataWrappingImplementation_create__ImageDataWrappingImplementation(){
   return _ImageDataWrappingImplementation$Dart.create__ImageDataWrappingImplementation$member();
 }
+_ImageDataWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _ImageDataWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_ImageDataWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__ImageDataWrappingImplementation__get_height(_this);
+}
+;
 _ImageDataWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'ImageData';
 }
@@ -23163,6 +24749,20 @@ _NodeWrappingImplementation$Dart._get_parentNode$$member_ = function(_this){
   return native__NodeWrappingImplementation__get_parentNode(_this);
 }
 ;
+_NodeWrappingImplementation$Dart.prototype.removeChild$member = function(oldChild){
+  return _NodeWrappingImplementation$Dart._removeChild$$member_(this, oldChild);
+}
+;
+_NodeWrappingImplementation$Dart.prototype.removeChild$named = function($n, $o, oldChild){
+  if ($o.count || $n != 1)
+    $nsme();
+  return _NodeWrappingImplementation$Dart.prototype.removeChild$member.call(this, oldChild);
+}
+;
+_NodeWrappingImplementation$Dart._removeChild$$member_ = function(receiver, oldChild){
+  return native__NodeWrappingImplementation__removeChild(receiver, oldChild);
+}
+;
 _NodeWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'Node';
 }
@@ -23689,6 +25289,14 @@ _HTMLDocumentWrappingImplementation$Dart.create__HTMLDocumentWrappingImplementat
 function native__HTMLDocumentWrappingImplementation_create__HTMLDocumentWrappingImplementation(){
   return _HTMLDocumentWrappingImplementation$Dart.create__HTMLDocumentWrappingImplementation$member();
 }
+_HTMLDocumentWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLDocumentWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLDocumentWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLDocumentWrappingImplementation__get_height(_this);
+}
+;
 _HTMLDocumentWrappingImplementation$Dart.prototype.clear$member = function(){
   _HTMLDocumentWrappingImplementation$Dart._clear$$member_(this);
   return;
@@ -23725,15 +25333,6 @@ _HTMLDocumentWrappingImplementation$Dart.prototype.close$named = function($n, $o
 ;
 _HTMLDocumentWrappingImplementation$Dart._close$$member_ = function(receiver){
   return native__HTMLDocumentWrappingImplementation__close(receiver);
-}
-;
-_HTMLDocumentWrappingImplementation$Dart.prototype.write$member = function(text){
-  _HTMLDocumentWrappingImplementation$Dart._write$$member_(this, text);
-  return;
-}
-;
-_HTMLDocumentWrappingImplementation$Dart._write$$member_ = function(receiver, text){
-  return native__HTMLDocumentWrappingImplementation__write(receiver, text);
 }
 ;
 _HTMLDocumentWrappingImplementation$Dart.prototype.typeName$getter = function(){
@@ -23909,6 +25508,14 @@ _HTMLAppletElementWrappingImplementation$Dart.create__HTMLAppletElementWrappingI
 function native__HTMLAppletElementWrappingImplementation_create__HTMLAppletElementWrappingImplementation(){
   return _HTMLAppletElementWrappingImplementation$Dart.create__HTMLAppletElementWrappingImplementation$member();
 }
+_HTMLAppletElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLAppletElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLAppletElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLAppletElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLAppletElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLAppletElement';
 }
@@ -24252,6 +25859,14 @@ _HTMLCanvasElementWrappingImplementation$Dart.create__HTMLCanvasElementWrappingI
 function native__HTMLCanvasElementWrappingImplementation_create__HTMLCanvasElementWrappingImplementation(){
   return _HTMLCanvasElementWrappingImplementation$Dart.create__HTMLCanvasElementWrappingImplementation$member();
 }
+_HTMLCanvasElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLCanvasElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLCanvasElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLCanvasElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLCanvasElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLCanvasElement';
 }
@@ -24522,6 +26137,14 @@ _HTMLEmbedElementWrappingImplementation$Dart.create__HTMLEmbedElementWrappingImp
 function native__HTMLEmbedElementWrappingImplementation_create__HTMLEmbedElementWrappingImplementation(){
   return _HTMLEmbedElementWrappingImplementation$Dart.create__HTMLEmbedElementWrappingImplementation$member();
 }
+_HTMLEmbedElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLEmbedElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLEmbedElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLEmbedElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLEmbedElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLEmbedElement';
 }
@@ -24710,6 +26333,14 @@ _HTMLFrameElementWrappingImplementation$Dart.create__HTMLFrameElementWrappingImp
 function native__HTMLFrameElementWrappingImplementation_create__HTMLFrameElementWrappingImplementation(){
   return _HTMLFrameElementWrappingImplementation$Dart.create__HTMLFrameElementWrappingImplementation$member();
 }
+_HTMLFrameElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLFrameElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLFrameElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLFrameElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLFrameElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLFrameElement';
 }
@@ -24980,6 +26611,14 @@ _HTMLIFrameElementWrappingImplementation$Dart.create__HTMLIFrameElementWrappingI
 function native__HTMLIFrameElementWrappingImplementation_create__HTMLIFrameElementWrappingImplementation(){
   return _HTMLIFrameElementWrappingImplementation$Dart.create__HTMLIFrameElementWrappingImplementation$member();
 }
+_HTMLIFrameElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLIFrameElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLIFrameElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLIFrameElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLIFrameElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLIFrameElement';
 }
@@ -25035,6 +26674,30 @@ _HTMLImageElementWrappingImplementation$Dart.prototype.complete$getter = functio
 ;
 _HTMLImageElementWrappingImplementation$Dart._get_complete$$member_ = function(_this){
   return native__HTMLImageElementWrappingImplementation__get_complete(_this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLImageElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLImageElementWrappingImplementation__get_height(_this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _HTMLImageElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__HTMLImageElementWrappingImplementation__get_x(_this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _HTMLImageElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_HTMLImageElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__HTMLImageElementWrappingImplementation__get_y(_this);
 }
 ;
 _HTMLImageElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
@@ -25458,6 +27121,14 @@ _HTMLMarqueeElementWrappingImplementation$Dart.create__HTMLMarqueeElementWrappin
 function native__HTMLMarqueeElementWrappingImplementation_create__HTMLMarqueeElementWrappingImplementation(){
   return _HTMLMarqueeElementWrappingImplementation$Dart.create__HTMLMarqueeElementWrappingImplementation$member();
 }
+_HTMLMarqueeElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLMarqueeElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLMarqueeElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLMarqueeElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLMarqueeElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLMarqueeElement';
 }
@@ -25826,6 +27497,14 @@ _HTMLObjectElementWrappingImplementation$Dart.create__HTMLObjectElementWrappingI
 function native__HTMLObjectElementWrappingImplementation_create__HTMLObjectElementWrappingImplementation(){
   return _HTMLObjectElementWrappingImplementation$Dart.create__HTMLObjectElementWrappingImplementation$member();
 }
+_HTMLObjectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLObjectElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLObjectElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLObjectElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLObjectElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLObjectElement';
 }
@@ -25893,6 +27572,7 @@ _HTMLOptionElementWrappingImplementation$Dart.$addTo = function(target){
   HTMLOptionElement$Dart.$addTo(target);
 }
 ;
+_HTMLOptionElementWrappingImplementation$Dart.prototype.$implements$HTMLOptionElement$Dart = 1;
 _HTMLOptionElementWrappingImplementation$Dart.$Constructor = function(){
   _HTMLElementWrappingImplementation$Dart.$Constructor.call(this);
 }
@@ -26347,6 +28027,35 @@ _HTMLSelectElementWrappingImplementation$Dart._add$$member_ = function(receiver,
   return native__HTMLSelectElementWrappingImplementation__add(receiver, element, before);
 }
 ;
+_HTMLSelectElementWrappingImplementation$Dart.prototype.remove$member = function(index_OR_option){
+  var tmp$0;
+  if ($isNum(index_OR_option)) {
+    _HTMLSelectElementWrappingImplementation$Dart._remove$$member_(this, index_OR_option);
+    return;
+  }
+   else {
+    if (!!(tmp$0 = index_OR_option , tmp$0 != null && tmp$0.$implements$HTMLOptionElement$Dart)) {
+      _HTMLSelectElementWrappingImplementation$Dart._remove_2$$member_(this, index_OR_option);
+      return;
+    }
+  }
+  $Dart$ThrowException('Incorrect number or type of arguments');
+}
+;
+_HTMLSelectElementWrappingImplementation$Dart.prototype.remove$named = function($n, $o, index_OR_option){
+  if ($o.count || $n != 1)
+    $nsme();
+  return _HTMLSelectElementWrappingImplementation$Dart.prototype.remove$member.call(this, index_OR_option);
+}
+;
+_HTMLSelectElementWrappingImplementation$Dart._remove$$member_ = function(receiver, index_OR_option){
+  return native__HTMLSelectElementWrappingImplementation__remove(receiver, index_OR_option);
+}
+;
+_HTMLSelectElementWrappingImplementation$Dart._remove_2$$member_ = function(receiver, index_OR_option){
+  return native__HTMLSelectElementWrappingImplementation__remove_2(receiver, index_OR_option);
+}
+;
 _HTMLSelectElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLSelectElement';
 }
@@ -26572,6 +28281,14 @@ _HTMLTableCellElementWrappingImplementation$Dart.create__HTMLTableCellElementWra
 function native__HTMLTableCellElementWrappingImplementation_create__HTMLTableCellElementWrappingImplementation(){
   return _HTMLTableCellElementWrappingImplementation$Dart.create__HTMLTableCellElementWrappingImplementation$member();
 }
+_HTMLTableCellElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLTableCellElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLTableCellElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLTableCellElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLTableCellElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLTableCellElement';
 }
@@ -27030,6 +28747,14 @@ _HTMLVideoElementWrappingImplementation$Dart.create__HTMLVideoElementWrappingImp
 function native__HTMLVideoElementWrappingImplementation_create__HTMLVideoElementWrappingImplementation(){
   return _HTMLVideoElementWrappingImplementation$Dart.create__HTMLVideoElementWrappingImplementation$member();
 }
+_HTMLVideoElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _HTMLVideoElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_HTMLVideoElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__HTMLVideoElementWrappingImplementation__get_height(_this);
+}
+;
 _HTMLVideoElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'HTMLVideoElement';
 }
@@ -29723,6 +31448,22 @@ _SVGCursorElementWrappingImplementation$Dart.create__SVGCursorElementWrappingImp
 function native__SVGCursorElementWrappingImplementation_create__SVGCursorElementWrappingImplementation(){
   return _SVGCursorElementWrappingImplementation$Dart.create__SVGCursorElementWrappingImplementation$member();
 }
+_SVGCursorElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGCursorElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGCursorElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGCursorElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGCursorElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGCursorElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGCursorElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGCursorElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGCursorElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGCursorElement';
 }
@@ -30007,6 +31748,30 @@ _SVGFEBlendElementWrappingImplementation$Dart.create__SVGFEBlendElementWrappingI
 function native__SVGFEBlendElementWrappingImplementation_create__SVGFEBlendElementWrappingImplementation(){
   return _SVGFEBlendElementWrappingImplementation$Dart.create__SVGFEBlendElementWrappingImplementation$member();
 }
+_SVGFEBlendElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEBlendElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEBlendElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEBlendElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEBlendElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEBlendElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEBlendElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEBlendElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEBlendElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEBlendElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEBlendElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEBlendElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEBlendElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEBlendElement';
 }
@@ -30052,6 +31817,30 @@ _SVGFEColorMatrixElementWrappingImplementation$Dart.create__SVGFEColorMatrixElem
 function native__SVGFEColorMatrixElementWrappingImplementation_create__SVGFEColorMatrixElementWrappingImplementation(){
   return _SVGFEColorMatrixElementWrappingImplementation$Dart.create__SVGFEColorMatrixElementWrappingImplementation$member();
 }
+_SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEColorMatrixElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEColorMatrixElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEColorMatrixElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEColorMatrixElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEColorMatrixElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEColorMatrixElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEColorMatrixElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEColorMatrixElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEColorMatrixElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEColorMatrixElement';
 }
@@ -30097,6 +31886,30 @@ _SVGFEComponentTransferElementWrappingImplementation$Dart.create__SVGFEComponent
 function native__SVGFEComponentTransferElementWrappingImplementation_create__SVGFEComponentTransferElementWrappingImplementation(){
   return _SVGFEComponentTransferElementWrappingImplementation$Dart.create__SVGFEComponentTransferElementWrappingImplementation$member();
 }
+_SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEComponentTransferElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEComponentTransferElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEComponentTransferElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEComponentTransferElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEComponentTransferElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEComponentTransferElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEComponentTransferElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEComponentTransferElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEComponentTransferElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEComponentTransferElement';
 }
@@ -30142,6 +31955,30 @@ _SVGFECompositeElementWrappingImplementation$Dart.create__SVGFECompositeElementW
 function native__SVGFECompositeElementWrappingImplementation_create__SVGFECompositeElementWrappingImplementation(){
   return _SVGFECompositeElementWrappingImplementation$Dart.create__SVGFECompositeElementWrappingImplementation$member();
 }
+_SVGFECompositeElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFECompositeElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFECompositeElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFECompositeElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFECompositeElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFECompositeElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFECompositeElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFECompositeElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFECompositeElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFECompositeElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFECompositeElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFECompositeElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFECompositeElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFECompositeElement';
 }
@@ -30187,6 +32024,30 @@ _SVGFEConvolveMatrixElementWrappingImplementation$Dart.create__SVGFEConvolveMatr
 function native__SVGFEConvolveMatrixElementWrappingImplementation_create__SVGFEConvolveMatrixElementWrappingImplementation(){
   return _SVGFEConvolveMatrixElementWrappingImplementation$Dart.create__SVGFEConvolveMatrixElementWrappingImplementation$member();
 }
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEConvolveMatrixElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEConvolveMatrixElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEConvolveMatrixElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEConvolveMatrixElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEConvolveMatrixElement';
 }
@@ -30232,6 +32093,30 @@ _SVGFEDiffuseLightingElementWrappingImplementation$Dart.create__SVGFEDiffuseLigh
 function native__SVGFEDiffuseLightingElementWrappingImplementation_create__SVGFEDiffuseLightingElementWrappingImplementation(){
   return _SVGFEDiffuseLightingElementWrappingImplementation$Dart.create__SVGFEDiffuseLightingElementWrappingImplementation$member();
 }
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEDiffuseLightingElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEDiffuseLightingElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEDiffuseLightingElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEDiffuseLightingElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEDiffuseLightingElement';
 }
@@ -30277,6 +32162,30 @@ _SVGFEDisplacementMapElementWrappingImplementation$Dart.create__SVGFEDisplacemen
 function native__SVGFEDisplacementMapElementWrappingImplementation_create__SVGFEDisplacementMapElementWrappingImplementation(){
   return _SVGFEDisplacementMapElementWrappingImplementation$Dart.create__SVGFEDisplacementMapElementWrappingImplementation$member();
 }
+_SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEDisplacementMapElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEDisplacementMapElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEDisplacementMapElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEDisplacementMapElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEDisplacementMapElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEDisplacementMapElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEDisplacementMapElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEDisplacementMapElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEDisplacementMapElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEDisplacementMapElement';
 }
@@ -30367,6 +32276,30 @@ _SVGFEDropShadowElementWrappingImplementation$Dart.create__SVGFEDropShadowElemen
 function native__SVGFEDropShadowElementWrappingImplementation_create__SVGFEDropShadowElementWrappingImplementation(){
   return _SVGFEDropShadowElementWrappingImplementation$Dart.create__SVGFEDropShadowElementWrappingImplementation$member();
 }
+_SVGFEDropShadowElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEDropShadowElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEDropShadowElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEDropShadowElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEDropShadowElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEDropShadowElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEDropShadowElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEDropShadowElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEDropShadowElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEDropShadowElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEDropShadowElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEDropShadowElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEDropShadowElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEDropShadowElement';
 }
@@ -30412,6 +32345,30 @@ _SVGFEFloodElementWrappingImplementation$Dart.create__SVGFEFloodElementWrappingI
 function native__SVGFEFloodElementWrappingImplementation_create__SVGFEFloodElementWrappingImplementation(){
   return _SVGFEFloodElementWrappingImplementation$Dart.create__SVGFEFloodElementWrappingImplementation$member();
 }
+_SVGFEFloodElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEFloodElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEFloodElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEFloodElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEFloodElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEFloodElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEFloodElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEFloodElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEFloodElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEFloodElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEFloodElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEFloodElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEFloodElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEFloodElement';
 }
@@ -30637,6 +32594,30 @@ _SVGFEGaussianBlurElementWrappingImplementation$Dart.create__SVGFEGaussianBlurEl
 function native__SVGFEGaussianBlurElementWrappingImplementation_create__SVGFEGaussianBlurElementWrappingImplementation(){
   return _SVGFEGaussianBlurElementWrappingImplementation$Dart.create__SVGFEGaussianBlurElementWrappingImplementation$member();
 }
+_SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEGaussianBlurElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEGaussianBlurElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEGaussianBlurElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEGaussianBlurElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEGaussianBlurElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEGaussianBlurElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEGaussianBlurElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEGaussianBlurElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEGaussianBlurElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEGaussianBlurElement';
 }
@@ -30682,6 +32663,30 @@ _SVGFEImageElementWrappingImplementation$Dart.create__SVGFEImageElementWrappingI
 function native__SVGFEImageElementWrappingImplementation_create__SVGFEImageElementWrappingImplementation(){
   return _SVGFEImageElementWrappingImplementation$Dart.create__SVGFEImageElementWrappingImplementation$member();
 }
+_SVGFEImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEImageElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEImageElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEImageElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEImageElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEImageElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEImageElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEImageElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEImageElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEImageElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEImageElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEImageElement';
 }
@@ -30727,6 +32732,30 @@ _SVGFEMergeElementWrappingImplementation$Dart.create__SVGFEMergeElementWrappingI
 function native__SVGFEMergeElementWrappingImplementation_create__SVGFEMergeElementWrappingImplementation(){
   return _SVGFEMergeElementWrappingImplementation$Dart.create__SVGFEMergeElementWrappingImplementation$member();
 }
+_SVGFEMergeElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEMergeElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEMergeElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEMergeElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEMergeElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEMergeElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEMergeElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEMergeElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEMergeElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEMergeElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEMergeElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEMergeElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEMergeElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEMergeElement';
 }
@@ -30817,6 +32846,30 @@ _SVGFEMorphologyElementWrappingImplementation$Dart.create__SVGFEMorphologyElemen
 function native__SVGFEMorphologyElementWrappingImplementation_create__SVGFEMorphologyElementWrappingImplementation(){
   return _SVGFEMorphologyElementWrappingImplementation$Dart.create__SVGFEMorphologyElementWrappingImplementation$member();
 }
+_SVGFEMorphologyElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEMorphologyElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEMorphologyElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEMorphologyElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEMorphologyElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEMorphologyElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEMorphologyElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEMorphologyElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEMorphologyElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEMorphologyElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEMorphologyElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEMorphologyElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEMorphologyElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEMorphologyElement';
 }
@@ -30862,6 +32915,30 @@ _SVGFEOffsetElementWrappingImplementation$Dart.create__SVGFEOffsetElementWrappin
 function native__SVGFEOffsetElementWrappingImplementation_create__SVGFEOffsetElementWrappingImplementation(){
   return _SVGFEOffsetElementWrappingImplementation$Dart.create__SVGFEOffsetElementWrappingImplementation$member();
 }
+_SVGFEOffsetElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFEOffsetElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFEOffsetElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFEOffsetElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFEOffsetElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEOffsetElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEOffsetElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEOffsetElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEOffsetElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEOffsetElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEOffsetElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEOffsetElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEOffsetElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEOffsetElement';
 }
@@ -30907,6 +32984,22 @@ _SVGFEPointLightElementWrappingImplementation$Dart.create__SVGFEPointLightElemen
 function native__SVGFEPointLightElementWrappingImplementation_create__SVGFEPointLightElementWrappingImplementation(){
   return _SVGFEPointLightElementWrappingImplementation$Dart.create__SVGFEPointLightElementWrappingImplementation$member();
 }
+_SVGFEPointLightElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFEPointLightElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFEPointLightElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFEPointLightElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFEPointLightElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFEPointLightElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFEPointLightElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFEPointLightElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFEPointLightElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFEPointLightElement';
 }
@@ -30952,6 +33045,30 @@ _SVGFESpecularLightingElementWrappingImplementation$Dart.create__SVGFESpecularLi
 function native__SVGFESpecularLightingElementWrappingImplementation_create__SVGFESpecularLightingElementWrappingImplementation(){
   return _SVGFESpecularLightingElementWrappingImplementation$Dart.create__SVGFESpecularLightingElementWrappingImplementation$member();
 }
+_SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFESpecularLightingElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFESpecularLightingElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFESpecularLightingElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFESpecularLightingElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFESpecularLightingElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFESpecularLightingElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFESpecularLightingElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFESpecularLightingElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFESpecularLightingElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFESpecularLightingElement';
 }
@@ -30997,6 +33114,22 @@ _SVGFESpotLightElementWrappingImplementation$Dart.create__SVGFESpotLightElementW
 function native__SVGFESpotLightElementWrappingImplementation_create__SVGFESpotLightElementWrappingImplementation(){
   return _SVGFESpotLightElementWrappingImplementation$Dart.create__SVGFESpotLightElementWrappingImplementation$member();
 }
+_SVGFESpotLightElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFESpotLightElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFESpotLightElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFESpotLightElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFESpotLightElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFESpotLightElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFESpotLightElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFESpotLightElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFESpotLightElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFESpotLightElement';
 }
@@ -31042,6 +33175,30 @@ _SVGFETileElementWrappingImplementation$Dart.create__SVGFETileElementWrappingImp
 function native__SVGFETileElementWrappingImplementation_create__SVGFETileElementWrappingImplementation(){
   return _SVGFETileElementWrappingImplementation$Dart.create__SVGFETileElementWrappingImplementation$member();
 }
+_SVGFETileElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFETileElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFETileElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFETileElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFETileElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFETileElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFETileElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFETileElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFETileElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFETileElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFETileElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFETileElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFETileElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFETileElement';
 }
@@ -31087,6 +33244,30 @@ _SVGFETurbulenceElementWrappingImplementation$Dart.create__SVGFETurbulenceElemen
 function native__SVGFETurbulenceElementWrappingImplementation_create__SVGFETurbulenceElementWrappingImplementation(){
   return _SVGFETurbulenceElementWrappingImplementation$Dart.create__SVGFETurbulenceElementWrappingImplementation$member();
 }
+_SVGFETurbulenceElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFETurbulenceElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFETurbulenceElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFETurbulenceElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFETurbulenceElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFETurbulenceElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFETurbulenceElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFETurbulenceElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFETurbulenceElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFETurbulenceElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFETurbulenceElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFETurbulenceElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFETurbulenceElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFETurbulenceElement';
 }
@@ -31132,6 +33313,30 @@ _SVGFilterElementWrappingImplementation$Dart.create__SVGFilterElementWrappingImp
 function native__SVGFilterElementWrappingImplementation_create__SVGFilterElementWrappingImplementation(){
   return _SVGFilterElementWrappingImplementation$Dart.create__SVGFilterElementWrappingImplementation$member();
 }
+_SVGFilterElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFilterElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFilterElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFilterElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGFilterElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFilterElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFilterElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFilterElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGFilterElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFilterElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFilterElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFilterElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGFilterElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFilterElement';
 }
@@ -31492,6 +33697,30 @@ _SVGForeignObjectElementWrappingImplementation$Dart.create__SVGForeignObjectElem
 function native__SVGForeignObjectElementWrappingImplementation_create__SVGForeignObjectElementWrappingImplementation(){
   return _SVGForeignObjectElementWrappingImplementation$Dart.create__SVGForeignObjectElementWrappingImplementation$member();
 }
+_SVGForeignObjectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGForeignObjectElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGForeignObjectElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGForeignObjectElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGForeignObjectElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGForeignObjectElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGForeignObjectElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGForeignObjectElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGForeignObjectElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGForeignObjectElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGForeignObjectElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGForeignObjectElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGForeignObjectElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGForeignObjectElement';
 }
@@ -31627,6 +33856,38 @@ _SVGGlyphRefElementWrappingImplementation$Dart.create__SVGGlyphRefElementWrappin
 function native__SVGGlyphRefElementWrappingImplementation_create__SVGGlyphRefElementWrappingImplementation(){
   return _SVGGlyphRefElementWrappingImplementation$Dart.create__SVGGlyphRefElementWrappingImplementation$member();
 }
+_SVGGlyphRefElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGGlyphRefElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGGlyphRefElementWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGGlyphRefElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGGlyphRefElementWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGGlyphRefElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGGlyphRefElementWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGGlyphRefElementWrappingImplementation__get_y(_this);
+}
+;
+_SVGGlyphRefElementWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGGlyphRefElementWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGGlyphRefElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGGlyphRefElement';
 }
@@ -31762,6 +34023,30 @@ _SVGImageElementWrappingImplementation$Dart.create__SVGImageElementWrappingImple
 function native__SVGImageElementWrappingImplementation_create__SVGImageElementWrappingImplementation(){
   return _SVGImageElementWrappingImplementation$Dart.create__SVGImageElementWrappingImplementation$member();
 }
+_SVGImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGImageElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGImageElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGImageElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGImageElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGImageElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGImageElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGImageElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGImageElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGImageElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGImageElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGImageElement';
 }
@@ -32198,6 +34483,30 @@ _SVGMaskElementWrappingImplementation$Dart.create__SVGMaskElementWrappingImpleme
 function native__SVGMaskElementWrappingImplementation_create__SVGMaskElementWrappingImplementation(){
   return _SVGMaskElementWrappingImplementation$Dart.create__SVGMaskElementWrappingImplementation$member();
 }
+_SVGMaskElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGMaskElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGMaskElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGMaskElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGMaskElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGMaskElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGMaskElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGMaskElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGMaskElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGMaskElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGMaskElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGMaskElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGMaskElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGMaskElement';
 }
@@ -32702,6 +35011,38 @@ _SVGPathSegArcAbsWrappingImplementation$Dart.create__SVGPathSegArcAbsWrappingImp
 function native__SVGPathSegArcAbsWrappingImplementation_create__SVGPathSegArcAbsWrappingImplementation(){
   return _SVGPathSegArcAbsWrappingImplementation$Dart.create__SVGPathSegArcAbsWrappingImplementation$member();
 }
+_SVGPathSegArcAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegArcAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegArcAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegArcAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegArcAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegArcAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegArcAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegArcAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegArcAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegArcAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegArcAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegArcAbs';
 }
@@ -32747,6 +35088,38 @@ _SVGPathSegArcRelWrappingImplementation$Dart.create__SVGPathSegArcRelWrappingImp
 function native__SVGPathSegArcRelWrappingImplementation_create__SVGPathSegArcRelWrappingImplementation(){
   return _SVGPathSegArcRelWrappingImplementation$Dart.create__SVGPathSegArcRelWrappingImplementation$member();
 }
+_SVGPathSegArcRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegArcRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegArcRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegArcRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegArcRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegArcRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegArcRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegArcRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegArcRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegArcRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegArcRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegArcRel';
 }
@@ -32837,6 +35210,38 @@ _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.create__SVGPathSegCurvetoC
 function native__SVGPathSegCurvetoCubicAbsWrappingImplementation_create__SVGPathSegCurvetoCubicAbsWrappingImplementation(){
   return _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.create__SVGPathSegCurvetoCubicAbsWrappingImplementation$member();
 }
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoCubicAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoCubicAbs';
 }
@@ -32882,6 +35287,38 @@ _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.create__SVGPathSegCurvetoC
 function native__SVGPathSegCurvetoCubicRelWrappingImplementation_create__SVGPathSegCurvetoCubicRelWrappingImplementation(){
   return _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.create__SVGPathSegCurvetoCubicRelWrappingImplementation$member();
 }
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoCubicRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoCubicRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoCubicRel';
 }
@@ -32927,6 +35364,38 @@ _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.create__SVGPathSegCu
 function native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation_create__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation(){
   return _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.create__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$member();
 }
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoCubicSmoothAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoCubicSmoothAbs';
 }
@@ -32972,6 +35441,38 @@ _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.create__SVGPathSegCu
 function native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation_create__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation(){
   return _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.create__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$member();
 }
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoCubicSmoothRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoCubicSmoothRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoCubicSmoothRel';
 }
@@ -33017,6 +35518,38 @@ _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.create__SVGPathSegCurv
 function native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation_create__SVGPathSegCurvetoQuadraticAbsWrappingImplementation(){
   return _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.create__SVGPathSegCurvetoQuadraticAbsWrappingImplementation$member();
 }
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoQuadraticAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoQuadraticAbs';
 }
@@ -33062,6 +35595,38 @@ _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.create__SVGPathSegCurv
 function native__SVGPathSegCurvetoQuadraticRelWrappingImplementation_create__SVGPathSegCurvetoQuadraticRelWrappingImplementation(){
   return _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.create__SVGPathSegCurvetoQuadraticRelWrappingImplementation$member();
 }
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoQuadraticRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoQuadraticRel';
 }
@@ -33107,6 +35672,38 @@ _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.create__SVGPathS
 function native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation_create__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation(){
   return _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.create__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$member();
 }
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoQuadraticSmoothAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoQuadraticSmoothAbs';
 }
@@ -33152,6 +35749,38 @@ _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.create__SVGPathS
 function native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation_create__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation(){
   return _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.create__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$member();
 }
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegCurvetoQuadraticSmoothRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegCurvetoQuadraticSmoothRel';
 }
@@ -33197,6 +35826,38 @@ _SVGPathSegLinetoAbsWrappingImplementation$Dart.create__SVGPathSegLinetoAbsWrapp
 function native__SVGPathSegLinetoAbsWrappingImplementation_create__SVGPathSegLinetoAbsWrappingImplementation(){
   return _SVGPathSegLinetoAbsWrappingImplementation$Dart.create__SVGPathSegLinetoAbsWrappingImplementation$member();
 }
+_SVGPathSegLinetoAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegLinetoAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegLinetoAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegLinetoAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegLinetoAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegLinetoAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegLinetoAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegLinetoAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegLinetoAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoAbs';
 }
@@ -33242,6 +35903,22 @@ _SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart.create__SVGPathSegLine
 function native__SVGPathSegLinetoHorizontalAbsWrappingImplementation_create__SVGPathSegLinetoHorizontalAbsWrappingImplementation(){
   return _SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart.create__SVGPathSegLinetoHorizontalAbsWrappingImplementation$member();
 }
+_SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegLinetoHorizontalAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoHorizontalAbsWrappingImplementation__set_x(_this, value);
+}
+;
 _SVGPathSegLinetoHorizontalAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoHorizontalAbs';
 }
@@ -33287,6 +35964,22 @@ _SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart.create__SVGPathSegLine
 function native__SVGPathSegLinetoHorizontalRelWrappingImplementation_create__SVGPathSegLinetoHorizontalRelWrappingImplementation(){
   return _SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart.create__SVGPathSegLinetoHorizontalRelWrappingImplementation$member();
 }
+_SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegLinetoHorizontalRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoHorizontalRelWrappingImplementation__set_x(_this, value);
+}
+;
 _SVGPathSegLinetoHorizontalRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoHorizontalRel';
 }
@@ -33332,6 +36025,38 @@ _SVGPathSegLinetoRelWrappingImplementation$Dart.create__SVGPathSegLinetoRelWrapp
 function native__SVGPathSegLinetoRelWrappingImplementation_create__SVGPathSegLinetoRelWrappingImplementation(){
   return _SVGPathSegLinetoRelWrappingImplementation$Dart.create__SVGPathSegLinetoRelWrappingImplementation$member();
 }
+_SVGPathSegLinetoRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegLinetoRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegLinetoRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegLinetoRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegLinetoRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegLinetoRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegLinetoRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegLinetoRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegLinetoRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoRel';
 }
@@ -33377,6 +36102,22 @@ _SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart.create__SVGPathSegLineto
 function native__SVGPathSegLinetoVerticalAbsWrappingImplementation_create__SVGPathSegLinetoVerticalAbsWrappingImplementation(){
   return _SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart.create__SVGPathSegLinetoVerticalAbsWrappingImplementation$member();
 }
+_SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegLinetoVerticalAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoVerticalAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegLinetoVerticalAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoVerticalAbs';
 }
@@ -33422,6 +36163,22 @@ _SVGPathSegLinetoVerticalRelWrappingImplementation$Dart.create__SVGPathSegLineto
 function native__SVGPathSegLinetoVerticalRelWrappingImplementation_create__SVGPathSegLinetoVerticalRelWrappingImplementation(){
   return _SVGPathSegLinetoVerticalRelWrappingImplementation$Dart.create__SVGPathSegLinetoVerticalRelWrappingImplementation$member();
 }
+_SVGPathSegLinetoVerticalRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegLinetoVerticalRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegLinetoVerticalRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegLinetoVerticalRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegLinetoVerticalRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegLinetoVerticalRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegLinetoVerticalRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegLinetoVerticalRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegLinetoVerticalRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegLinetoVerticalRel';
 }
@@ -33467,6 +36224,38 @@ _SVGPathSegMovetoAbsWrappingImplementation$Dart.create__SVGPathSegMovetoAbsWrapp
 function native__SVGPathSegMovetoAbsWrappingImplementation_create__SVGPathSegMovetoAbsWrappingImplementation(){
   return _SVGPathSegMovetoAbsWrappingImplementation$Dart.create__SVGPathSegMovetoAbsWrappingImplementation$member();
 }
+_SVGPathSegMovetoAbsWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegMovetoAbsWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegMovetoAbsWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegMovetoAbsWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegMovetoAbsWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegMovetoAbsWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegMovetoAbsWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegMovetoAbsWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegMovetoAbsWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegMovetoAbsWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegMovetoAbsWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegMovetoAbs';
 }
@@ -33512,6 +36301,38 @@ _SVGPathSegMovetoRelWrappingImplementation$Dart.create__SVGPathSegMovetoRelWrapp
 function native__SVGPathSegMovetoRelWrappingImplementation_create__SVGPathSegMovetoRelWrappingImplementation(){
   return _SVGPathSegMovetoRelWrappingImplementation$Dart.create__SVGPathSegMovetoRelWrappingImplementation$member();
 }
+_SVGPathSegMovetoRelWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPathSegMovetoRelWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPathSegMovetoRelWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPathSegMovetoRelWrappingImplementation__get_x(_this);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPathSegMovetoRelWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPathSegMovetoRelWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPathSegMovetoRelWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPathSegMovetoRelWrappingImplementation__get_y(_this);
+}
+;
+_SVGPathSegMovetoRelWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPathSegMovetoRelWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPathSegMovetoRelWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPathSegMovetoRel';
 }
@@ -33557,6 +36378,30 @@ _SVGPatternElementWrappingImplementation$Dart.create__SVGPatternElementWrappingI
 function native__SVGPatternElementWrappingImplementation_create__SVGPatternElementWrappingImplementation(){
   return _SVGPatternElementWrappingImplementation$Dart.create__SVGPatternElementWrappingImplementation$member();
 }
+_SVGPatternElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGPatternElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGPatternElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGPatternElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGPatternElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPatternElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPatternElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPatternElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGPatternElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPatternElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPatternElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPatternElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGPatternElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPatternElement';
 }
@@ -33670,6 +36515,38 @@ _SVGPointWrappingImplementation$Dart.create__SVGPointWrappingImplementation$memb
 function native__SVGPointWrappingImplementation_create__SVGPointWrappingImplementation(){
   return _SVGPointWrappingImplementation$Dart.create__SVGPointWrappingImplementation$member();
 }
+_SVGPointWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGPointWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGPointWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGPointWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGPointWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGPointWrappingImplementation__get_x(_this);
+}
+;
+_SVGPointWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGPointWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGPointWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGPointWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGPointWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGPointWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGPointWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGPointWrappingImplementation__get_y(_this);
+}
+;
+_SVGPointWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGPointWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGPointWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGPoint';
 }
@@ -33895,6 +36772,30 @@ _SVGRectElementWrappingImplementation$Dart.create__SVGRectElementWrappingImpleme
 function native__SVGRectElementWrappingImplementation_create__SVGRectElementWrappingImplementation(){
   return _SVGRectElementWrappingImplementation$Dart.create__SVGRectElementWrappingImplementation$member();
 }
+_SVGRectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGRectElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGRectElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGRectElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGRectElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGRectElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGRectElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGRectElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGRectElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGRectElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGRectElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGRectElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGRectElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGRectElement';
 }
@@ -33940,6 +36841,46 @@ _SVGRectWrappingImplementation$Dart.create__SVGRectWrappingImplementation$member
 function native__SVGRectWrappingImplementation_create__SVGRectWrappingImplementation(){
   return _SVGRectWrappingImplementation$Dart.create__SVGRectWrappingImplementation$member();
 }
+_SVGRectWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGRectWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGRectWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGRectWrappingImplementation__get_height(_this);
+}
+;
+_SVGRectWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGRectWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGRectWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _SVGRectWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_SVGRectWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGRectWrappingImplementation__get_x(_this);
+}
+;
+_SVGRectWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__SVGRectWrappingImplementation__set_x(_this, value);
+}
+;
+_SVGRectWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGRectWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGRectWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _SVGRectWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_SVGRectWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGRectWrappingImplementation__get_y(_this);
+}
+;
+_SVGRectWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__SVGRectWrappingImplementation__set_y(_this, value);
+}
+;
 _SVGRectWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGRect';
 }
@@ -34030,6 +36971,30 @@ _SVGSVGElementWrappingImplementation$Dart.create__SVGSVGElementWrappingImplement
 function native__SVGSVGElementWrappingImplementation_create__SVGSVGElementWrappingImplementation(){
   return _SVGSVGElementWrappingImplementation$Dart.create__SVGSVGElementWrappingImplementation$member();
 }
+_SVGSVGElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGSVGElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGSVGElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGSVGElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGSVGElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGSVGElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGSVGElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGSVGElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGSVGElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGSVGElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGSVGElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGSVGElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGSVGElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGSVGElement';
 }
@@ -34323,6 +37288,30 @@ _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.create__SVGFilt
 function native__SVGFilterPrimitiveStandardAttributesWrappingImplementation_create__SVGFilterPrimitiveStandardAttributesWrappingImplementation(){
   return _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.create__SVGFilterPrimitiveStandardAttributesWrappingImplementation$member();
 }
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_height(_this);
+}
+;
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_x(_this);
+}
+;
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGFilterPrimitiveStandardAttributesWrappingImplementation__get_y(_this);
+}
+;
 _SVGFilterPrimitiveStandardAttributesWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGFilterPrimitiveStandardAttributes';
 }
@@ -34638,6 +37627,22 @@ _SVGTextPositioningElementWrappingImplementation$Dart.create__SVGTextPositioning
 function native__SVGTextPositioningElementWrappingImplementation_create__SVGTextPositioningElementWrappingImplementation(){
   return _SVGTextPositioningElementWrappingImplementation$Dart.create__SVGTextPositioningElementWrappingImplementation$member();
 }
+_SVGTextPositioningElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGTextPositioningElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGTextPositioningElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGTextPositioningElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGTextPositioningElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGTextPositioningElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGTextPositioningElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGTextPositioningElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGTextPositioningElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGTextPositioningElement';
 }
@@ -35156,6 +38161,30 @@ _SVGUseElementWrappingImplementation$Dart.create__SVGUseElementWrappingImplement
 function native__SVGUseElementWrappingImplementation_create__SVGUseElementWrappingImplementation(){
   return _SVGUseElementWrappingImplementation$Dart.create__SVGUseElementWrappingImplementation$member();
 }
+_SVGUseElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _SVGUseElementWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_SVGUseElementWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__SVGUseElementWrappingImplementation__get_height(_this);
+}
+;
+_SVGUseElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _SVGUseElementWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_SVGUseElementWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__SVGUseElementWrappingImplementation__get_x(_this);
+}
+;
+_SVGUseElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _SVGUseElementWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_SVGUseElementWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__SVGUseElementWrappingImplementation__get_y(_this);
+}
+;
 _SVGUseElementWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'SVGUseElement';
 }
@@ -35381,6 +38410,14 @@ _ScreenWrappingImplementation$Dart.create__ScreenWrappingImplementation$member =
 function native__ScreenWrappingImplementation_create__ScreenWrappingImplementation(){
   return _ScreenWrappingImplementation$Dart.create__ScreenWrappingImplementation$member();
 }
+_ScreenWrappingImplementation$Dart.prototype.height$getter = function(){
+  return _ScreenWrappingImplementation$Dart._get_height$$member_(this);
+}
+;
+_ScreenWrappingImplementation$Dart._get_height$$member_ = function(_this){
+  return native__ScreenWrappingImplementation__get_height(_this);
+}
+;
 _ScreenWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'Screen';
 }
@@ -36863,6 +39900,22 @@ _MouseEventWrappingImplementation$Dart.create__MouseEventWrappingImplementation$
 function native__MouseEventWrappingImplementation_create__MouseEventWrappingImplementation(){
   return _MouseEventWrappingImplementation$Dart.create__MouseEventWrappingImplementation$member();
 }
+_MouseEventWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _MouseEventWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_MouseEventWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__MouseEventWrappingImplementation__get_x(_this);
+}
+;
+_MouseEventWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _MouseEventWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_MouseEventWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__MouseEventWrappingImplementation__get_y(_this);
+}
+;
 _MouseEventWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'MouseEvent';
 }
@@ -38768,6 +41821,38 @@ _WebKitPointWrappingImplementation$Dart.create__WebKitPointWrappingImplementatio
 function native__WebKitPointWrappingImplementation_create__WebKitPointWrappingImplementation(){
   return _WebKitPointWrappingImplementation$Dart.create__WebKitPointWrappingImplementation$member();
 }
+_WebKitPointWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _WebKitPointWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_WebKitPointWrappingImplementation$Dart.prototype.x$setter = function(value){
+  _WebKitPointWrappingImplementation$Dart._set_x$$member_(this, value);
+}
+;
+_WebKitPointWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__WebKitPointWrappingImplementation__get_x(_this);
+}
+;
+_WebKitPointWrappingImplementation$Dart._set_x$$member_ = function(_this, value){
+  return native__WebKitPointWrappingImplementation__set_x(_this, value);
+}
+;
+_WebKitPointWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _WebKitPointWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_WebKitPointWrappingImplementation$Dart.prototype.y$setter = function(value){
+  _WebKitPointWrappingImplementation$Dart._set_y$$member_(this, value);
+}
+;
+_WebKitPointWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__WebKitPointWrappingImplementation__get_y(_this);
+}
+;
+_WebKitPointWrappingImplementation$Dart._set_y$$member_ = function(_this, value){
+  return native__WebKitPointWrappingImplementation__set_y(_this, value);
+}
+;
 _WebKitPointWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'WebKitPoint';
 }
@@ -38963,6 +42048,22 @@ _WheelEventWrappingImplementation$Dart.create__WheelEventWrappingImplementation$
 function native__WheelEventWrappingImplementation_create__WheelEventWrappingImplementation(){
   return _WheelEventWrappingImplementation$Dart.create__WheelEventWrappingImplementation$member();
 }
+_WheelEventWrappingImplementation$Dart.prototype.x$getter = function(){
+  return _WheelEventWrappingImplementation$Dart._get_x$$member_(this);
+}
+;
+_WheelEventWrappingImplementation$Dart._get_x$$member_ = function(_this){
+  return native__WheelEventWrappingImplementation__get_x(_this);
+}
+;
+_WheelEventWrappingImplementation$Dart.prototype.y$getter = function(){
+  return _WheelEventWrappingImplementation$Dart._get_y$$member_(this);
+}
+;
+_WheelEventWrappingImplementation$Dart._get_y$$member_ = function(_this){
+  return native__WheelEventWrappingImplementation__get_y(_this);
+}
+;
 _WheelEventWrappingImplementation$Dart.prototype.typeName$getter = function(){
   return 'WheelEvent';
 }
@@ -40342,6 +43443,18 @@ htmlimpl0a8e4b$LevelDom$Dart.wrapElement$member = function(raw){
   }
 }
 ;
+htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member = function(raw){
+  return raw == null?$Dart$Null:raw.dartObjectLocalStorage$getter() != null?raw.dartObjectLocalStorage$getter():htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.SVGAnimatedLengthWrappingImplementation$_wrap$39$htmlimpl0a8e4b$$Factory_(raw);
+}
+;
+htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLengthList$member = function(raw){
+  return raw == null?$Dart$Null:raw.dartObjectLocalStorage$getter() != null?raw.dartObjectLocalStorage$getter():htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.SVGAnimatedLengthListWrappingImplementation$_wrap$43$htmlimpl0a8e4b$$Factory_(raw);
+}
+;
+htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedNumber$member = function(raw){
+  return raw == null?$Dart$Null:raw.dartObjectLocalStorage$getter() != null?raw.dartObjectLocalStorage$getter():htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.SVGAnimatedNumberWrappingImplementation$_wrap$39$htmlimpl0a8e4b$$Factory_(raw);
+}
+;
 htmlimpl0a8e4b$LevelDom$Dart.wrapWindow$member = function(raw){
   return raw == null?$Dart$Null:raw.dartObjectLocalStorage$getter() != null?raw.dartObjectLocalStorage$getter():htmlimpl0a8e4b$WindowWrappingImplementation$Dart.WindowWrappingImplementation$_wrap$28$htmlimpl0a8e4b$$Factory_(raw);
 }
@@ -40379,6 +43492,108 @@ htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Initializer_ = function
 ;
 htmlimpl0a8e4b$DOMWrapperBase$Dart.prototype._ptr$htmlimpl0a8e4b$$getter_ = function(){
   return this._ptr$htmlimpl0a8e4b$$field_;
+}
+;
+function htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart(){
+}
+$inherits(htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart, htmlimpl0a8e4b$DOMWrapperBase$Dart);
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart'), htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$RTTimplements);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$RTTimplements = function(rtt){
+  htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$addTo(rtt);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$addTo = function(target){
+  var rtt = htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  htmlimpl0a8e4b$DOMWrapperBase$Dart.$addTo(target);
+  htmld071c1$SVGAnimatedLengthList$Dart.$addTo(target);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.SVGAnimatedLengthListWrappingImplementation$_wrap$43$htmlimpl0a8e4b$$Factory_ = function(ptr){
+  var tmp$0 = new htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart;
+  tmp$0.$typeInfo = htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart.$lookupRTT();
+  htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
+  htmlimpl0a8e4b$SVGAnimatedLengthListWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
+  return tmp$0;
+}
+;
+function htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart(){
+}
+$inherits(htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart, htmlimpl0a8e4b$DOMWrapperBase$Dart);
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart'), htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$RTTimplements);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$RTTimplements = function(rtt){
+  htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$addTo(rtt);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$addTo = function(target){
+  var rtt = htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  htmlimpl0a8e4b$DOMWrapperBase$Dart.$addTo(target);
+  htmld071c1$SVGAnimatedLength$Dart.$addTo(target);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.SVGAnimatedLengthWrappingImplementation$_wrap$39$htmlimpl0a8e4b$$Factory_ = function(ptr){
+  var tmp$0 = new htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart;
+  tmp$0.$typeInfo = htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart.$lookupRTT();
+  htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
+  htmlimpl0a8e4b$SVGAnimatedLengthWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
+  return tmp$0;
+}
+;
+function htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart(){
+}
+$inherits(htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart, htmlimpl0a8e4b$DOMWrapperBase$Dart);
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart'), htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$RTTimplements);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$RTTimplements = function(rtt){
+  htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$addTo(rtt);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$addTo = function(target){
+  var rtt = htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  htmlimpl0a8e4b$DOMWrapperBase$Dart.$addTo(target);
+  htmld071c1$SVGAnimatedNumber$Dart.$addTo(target);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_ = function(ptr){
+  htmlimpl0a8e4b$DOMWrapperBase$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(this, ptr);
+}
+;
+htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.SVGAnimatedNumberWrappingImplementation$_wrap$39$htmlimpl0a8e4b$$Factory_ = function(ptr){
+  var tmp$0 = new htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart;
+  tmp$0.$typeInfo = htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart.$lookupRTT();
+  htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
+  htmlimpl0a8e4b$SVGAnimatedNumberWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
+  return tmp$0;
 }
 ;
 function htmlimpl0a8e4b$EventTargetWrappingImplementation$Dart(){
@@ -40435,6 +43650,19 @@ htmlimpl0a8e4b$NodeWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer
 ;
 htmlimpl0a8e4b$NodeWrappingImplementation$Dart.prototype.document$getter = function(){
   return htmlimpl0a8e4b$LevelDom$Dart.wrapDocument$member(this._ptr$htmlimpl0a8e4b$$getter_().ownerDocument$getter());
+}
+;
+htmlimpl0a8e4b$NodeWrappingImplementation$Dart.prototype.remove$member = function(){
+  if (this._ptr$htmlimpl0a8e4b$$getter_().parentNode$getter() != null) {
+    this._ptr$htmlimpl0a8e4b$$getter_().parentNode$getter().removeChild$named(1, $noargs, this._ptr$htmlimpl0a8e4b$$getter_());
+  }
+  return this;
+}
+;
+htmlimpl0a8e4b$NodeWrappingImplementation$Dart.prototype.remove$named = function($n, $o){
+  if ($o.count || $n != 0)
+    $nsme();
+  return htmlimpl0a8e4b$NodeWrappingImplementation$Dart.prototype.remove$member.call(this);
 }
 ;
 function htmlimpl0a8e4b$ElementWrappingImplementation$Dart(){
@@ -40724,6 +43952,10 @@ htmlimpl0a8e4b$CanvasElementWrappingImplementation$Dart.CanvasElementWrappingImp
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$CanvasElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
+}
+;
 function htmlimpl0a8e4b$DListElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$DListElementWrappingImplementation$Dart, htmlimpl0a8e4b$ElementWrappingImplementation$Dart);
@@ -40892,6 +44124,10 @@ htmlimpl0a8e4b$EmbedElementWrappingImplementation$Dart.EmbedElementWrappingImple
   htmlimpl0a8e4b$EmbedElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$EmbedElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$EmbedElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
 }
 ;
 function htmlimpl0a8e4b$FieldSetElementWrappingImplementation$Dart(){
@@ -41136,6 +44372,10 @@ htmlimpl0a8e4b$IFrameElementWrappingImplementation$Dart.IFrameElementWrappingImp
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$IFrameElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
+}
+;
 function htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart, htmlimpl0a8e4b$ElementWrappingImplementation$Dart);
@@ -41176,6 +44416,18 @@ htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart.prototype.complete$named 
 ;
 htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart.prototype.complete$getter = function(){
   return this._ptr$htmlimpl0a8e4b$$getter_().complete$getter();
+}
+;
+htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
+}
+;
+htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().x$getter();
+}
+;
+htmlimpl0a8e4b$ImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().y$getter();
 }
 ;
 function htmlimpl0a8e4b$InputElementWrappingImplementation$Dart(){
@@ -41458,6 +44710,10 @@ htmlimpl0a8e4b$MarqueeElementWrappingImplementation$Dart.MarqueeElementWrappingI
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$MarqueeElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
+}
+;
 function htmlimpl0a8e4b$MediaElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$MediaElementWrappingImplementation$Dart, htmlimpl0a8e4b$ElementWrappingImplementation$Dart);
@@ -41732,6 +44988,10 @@ htmlimpl0a8e4b$ObjectElementWrappingImplementation$Dart.ObjectElementWrappingImp
   htmlimpl0a8e4b$ObjectElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$ObjectElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$ObjectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
 }
 ;
 function htmlimpl0a8e4b$OptGroupElementWrappingImplementation$Dart(){
@@ -42464,6 +45724,14 @@ htmlimpl0a8e4b$SVGCursorElementWrappingImplementation$Dart.SVGCursorElementWrapp
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGCursorElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGCursorElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGDefsElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGDefsElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -42600,6 +45868,18 @@ htmlimpl0a8e4b$SVGFEBlendElementWrappingImplementation$Dart.SVGFEBlendElementWra
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEBlendElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEBlendElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEBlendElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -42632,6 +45912,18 @@ htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart.SVGFEColorMatr
   htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEColorMatrixElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFEComponentTransferElementWrappingImplementation$Dart(){
@@ -42668,6 +45960,18 @@ htmlimpl0a8e4b$SVGFEComponentTransferElementWrappingImplementation$Dart.SVGFECom
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEComponentTransferElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -42700,6 +46004,18 @@ htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart.SVGFEConvol
   htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEConvolveMatrixElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFEDiffuseLightingElementWrappingImplementation$Dart(){
@@ -42736,6 +46052,18 @@ htmlimpl0a8e4b$SVGFEDiffuseLightingElementWrappingImplementation$Dart.SVGFEDiffu
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDiffuseLightingElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -42768,6 +46096,18 @@ htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart.SVGFEDispl
   htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDisplacementMapElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFEDistantLightElementWrappingImplementation$Dart(){
@@ -42838,6 +46178,18 @@ htmlimpl0a8e4b$SVGFEDropShadowElementWrappingImplementation$Dart.SVGFEDropShadow
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEDropShadowElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDropShadowElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEDropShadowElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -42870,6 +46222,18 @@ htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart.SVGFEFloodElementWra
   htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEFloodElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFEFuncAElementWrappingImplementation$Dart(){
@@ -43042,6 +46406,18 @@ htmlimpl0a8e4b$SVGFEGaussianBlurElementWrappingImplementation$Dart.SVGFEGaussian
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEGaussianBlurElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43076,6 +46452,18 @@ htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart.SVGFEImageElementWra
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43108,6 +46496,18 @@ htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart.SVGFEMergeElementWra
   htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEMergeElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFEMergeNodeElementWrappingImplementation$Dart(){
@@ -43178,6 +46578,18 @@ htmlimpl0a8e4b$SVGFEOffsetElementWrappingImplementation$Dart.SVGFEOffsetElementW
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFEOffsetElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEOffsetElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEOffsetElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43210,6 +46622,14 @@ htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart.SVGFEPointLight
   htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedNumber$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFEPointLightElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedNumber$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFESpecularLightingElementWrappingImplementation$Dart(){
@@ -43246,6 +46666,18 @@ htmlimpl0a8e4b$SVGFESpecularLightingElementWrappingImplementation$Dart.SVGFESpec
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFESpecularLightingElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43278,6 +46710,14 @@ htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart.SVGFESpotLightEl
   htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedNumber$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFESpotLightElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedNumber$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFETileElementWrappingImplementation$Dart(){
@@ -43314,6 +46754,18 @@ htmlimpl0a8e4b$SVGFETileElementWrappingImplementation$Dart.SVGFETileElementWrapp
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFETileElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFETileElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFETileElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43348,6 +46800,18 @@ htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart.SVGFETurbulence
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFETurbulenceElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43380,6 +46844,18 @@ htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart.SVGFilterElementWrapp
   htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGFilterElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGFontElementWrappingImplementation$Dart(){
@@ -43620,6 +47096,18 @@ htmlimpl0a8e4b$SVGForeignObjectElementWrappingImplementation$Dart.SVGForeignObje
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGForeignObjectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGForeignObjectElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGForeignObjectElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGGElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGGElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43722,6 +47210,24 @@ htmlimpl0a8e4b$SVGGlyphRefElementWrappingImplementation$Dart.SVGGlyphRefElementW
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGGlyphRefElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().x$getter();
+}
+;
+htmlimpl0a8e4b$SVGGlyphRefElementWrappingImplementation$Dart.prototype.x$setter = function(value){
+  var tmp$0;
+  this._ptr$htmlimpl0a8e4b$$getter_().x$setter(tmp$0 = value) , tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGGlyphRefElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().y$getter();
+}
+;
+htmlimpl0a8e4b$SVGGlyphRefElementWrappingImplementation$Dart.prototype.y$setter = function(value){
+  var tmp$0;
+  this._ptr$htmlimpl0a8e4b$$getter_().y$setter(tmp$0 = value) , tmp$0;
+}
+;
 function htmlimpl0a8e4b$SVGGradientElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGGradientElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -43822,6 +47328,18 @@ htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart.SVGImageElementWrappin
   htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGImageElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGLineElementWrappingImplementation$Dart(){
@@ -43994,6 +47512,18 @@ htmlimpl0a8e4b$SVGMaskElementWrappingImplementation$Dart.SVGMaskElementWrappingI
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGMaskElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGMaskElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGMaskElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGMetadataElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGMetadataElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -44128,6 +47658,18 @@ htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart.SVGPatternElementWra
   htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGPatternElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGPolygonElementWrappingImplementation$Dart(){
@@ -44266,6 +47808,18 @@ htmlimpl0a8e4b$SVGRectElementWrappingImplementation$Dart.SVGRectElementWrappingI
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGRectElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGRectElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGRectElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGElementWrappingImplementation$Dart);
@@ -44298,6 +47852,18 @@ htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart.SVGSVGElementWrappingImp
   htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGSVGElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGScriptElementWrappingImplementation$Dart(){
@@ -44606,6 +48172,14 @@ htmlimpl0a8e4b$SVGTextPositioningElementWrappingImplementation$Dart.SVGTextPosit
   return tmp$0;
 }
 ;
+htmlimpl0a8e4b$SVGTextPositioningElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLengthList$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGTextPositioningElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLengthList$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
+}
+;
 function htmlimpl0a8e4b$SVGAltGlyphElementWrappingImplementation$Dart(){
 }
 $inherits(htmlimpl0a8e4b$SVGAltGlyphElementWrappingImplementation$Dart, htmlimpl0a8e4b$SVGTextPositioningElementWrappingImplementation$Dart);
@@ -44808,6 +48382,18 @@ htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart.SVGUseElementWrappingImp
   htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().height$getter());
+}
+;
+htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart.prototype.x$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().x$getter());
+}
+;
+htmlimpl0a8e4b$SVGUseElementWrappingImplementation$Dart.prototype.y$getter = function(){
+  return htmlimpl0a8e4b$LevelDom$Dart.wrapSVGAnimatedLength$member(this._ptr$htmlimpl0a8e4b$$getter_().y$getter());
 }
 ;
 function htmlimpl0a8e4b$SVGVKernElementWrappingImplementation$Dart(){
@@ -45138,6 +48724,10 @@ htmlimpl0a8e4b$TableCellElementWrappingImplementation$Dart.TableCellElementWrapp
   htmlimpl0a8e4b$TableCellElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$TableCellElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$TableCellElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
 }
 ;
 function htmlimpl0a8e4b$TableColElementWrappingImplementation$Dart(){
@@ -45482,6 +49072,10 @@ htmlimpl0a8e4b$VideoElementWrappingImplementation$Dart.VideoElementWrappingImple
   htmlimpl0a8e4b$VideoElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Initializer_.call(tmp$0, ptr);
   htmlimpl0a8e4b$VideoElementWrappingImplementation$Dart._wrap$htmlimpl0a8e4b$$Constructor_.call(tmp$0, ptr);
   return tmp$0;
+}
+;
+htmlimpl0a8e4b$VideoElementWrappingImplementation$Dart.prototype.height$getter = function(){
+  return this._ptr$htmlimpl0a8e4b$$getter_().height$getter();
 }
 ;
 function htmlimpl0a8e4b$BodyElementWrappingImplementation$Dart(){
@@ -46504,6 +50098,39 @@ htmld071c1$SVGAnimateTransformElement$Dart.$addTo = function(target){
   var rtt = htmld071c1$SVGAnimateTransformElement$Dart.$lookupRTT();
   target.implementedTypes[rtt.classKey] = rtt;
   htmld071c1$SVGAnimationElement$Dart.$addTo(target);
+}
+;
+function htmld071c1$SVGAnimatedLength$Dart(){
+}
+htmld071c1$SVGAnimatedLength$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmld071c1$SVGAnimatedLength$Dart'));
+}
+;
+htmld071c1$SVGAnimatedLength$Dart.$addTo = function(target){
+  var rtt = htmld071c1$SVGAnimatedLength$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+}
+;
+function htmld071c1$SVGAnimatedLengthList$Dart(){
+}
+htmld071c1$SVGAnimatedLengthList$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmld071c1$SVGAnimatedLengthList$Dart'));
+}
+;
+htmld071c1$SVGAnimatedLengthList$Dart.$addTo = function(target){
+  var rtt = htmld071c1$SVGAnimatedLengthList$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+}
+;
+function htmld071c1$SVGAnimatedNumber$Dart(){
+}
+htmld071c1$SVGAnimatedNumber$Dart.$lookupRTT = function(){
+  return RTT.create($cls('htmld071c1$SVGAnimatedNumber$Dart'));
+}
+;
+htmld071c1$SVGAnimatedNumber$Dart.$addTo = function(target){
+  var rtt = htmld071c1$SVGAnimatedNumber$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
 }
 ;
 function htmld071c1$SVGAnimationElement$Dart(){
@@ -48389,6 +52016,269 @@ htmld071c1$Window$Dart.$addTo = function(target){
   htmld071c1$EventTarget$Dart.$addTo(target);
 }
 ;
+function unnamed24196b$Ant$Dart(){
+}
+$inherits(unnamed24196b$Ant$Dart, Isolate$Dart);
+function unnamed24196b$Ant$Dart$isolateFactory(){
+  return unnamed24196b$Ant$Dart.default$factory();
+}
+unnamed24196b$Ant$Dart.prototype.getIsolateFactory = function(){
+  return unnamed24196b$Ant$Dart$isolateFactory;
+}
+;
+unnamed24196b$Ant$Dart.$lookupRTT = function(){
+  return RTT.create($cls('unnamed24196b$Ant$Dart'), unnamed24196b$Ant$Dart.$RTTimplements);
+}
+;
+unnamed24196b$Ant$Dart.$RTTimplements = function(rtt){
+  unnamed24196b$Ant$Dart.$addTo(rtt);
+}
+;
+unnamed24196b$Ant$Dart.$addTo = function(target){
+  var rtt = unnamed24196b$Ant$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  Isolate$Dart.$addTo(target);
+}
+;
+unnamed24196b$Ant$Dart.$Constructor = function(board){
+  Isolate$Dart.$Constructor.call(this);
+  var tmp$1, tmp$2, tmp$0;
+  this.board$setter(tmp$0 = board) , tmp$0;
+  this.x$setter(tmp$1 = 0) , tmp$1;
+  this.y$setter(tmp$2 = 0) , tmp$2;
+}
+;
+unnamed24196b$Ant$Dart.$Initializer = function(board){
+  Isolate$Dart.$Initializer.call(this);
+}
+;
+unnamed24196b$Ant$Dart.Ant$$Factory = function(board){
+  var tmp$0 = new unnamed24196b$Ant$Dart;
+  tmp$0.$typeInfo = unnamed24196b$Ant$Dart.$lookupRTT();
+  unnamed24196b$Ant$Dart.$Initializer.call(tmp$0, board);
+  unnamed24196b$Ant$Dart.$Constructor.call(tmp$0, board);
+  return tmp$0;
+}
+;
+unnamed24196b$Ant$Dart.prototype.x$getter = function(){
+  return this.x$field;
+}
+;
+unnamed24196b$Ant$Dart.prototype.x$setter = function(tmp$0){
+  this.x$field = tmp$0;
+}
+;
+unnamed24196b$Ant$Dart.prototype.y$getter = function(){
+  return this.y$field;
+}
+;
+unnamed24196b$Ant$Dart.prototype.y$setter = function(tmp$0){
+  this.y$field = tmp$0;
+}
+;
+unnamed24196b$Ant$Dart.prototype.board$getter = function(){
+  return this.board$field;
+}
+;
+unnamed24196b$Ant$Dart.prototype.board$setter = function(tmp$0){
+  this.board$field = tmp$0;
+}
+;
+unnamed24196b$Ant$Dart.prototype.randomPercentage$member = function(){
+  return MUL$operator(Math$Dart.random$member(), 100).toInt$named(0, $noargs);
+}
+;
+unnamed24196b$Ant$Dart.prototype.moveToRandomPosition$member = function(){
+  var tmp$1, tmp$2, tmp$3, tmp$0;
+  var frontOrBack = this.randomPercentage$member();
+  var leftOrRight = this.randomPercentage$member();
+  var lateralMove = GT$operator(leftOrRight, 50)?1:negate$operator(1);
+  var frontMove = GT$operator(frontOrBack, 50)?1:negate$operator(1);
+  tmp$0 = this , (tmp$0.x$setter(tmp$1 = ADD$operator(tmp$0.x$getter(), frontMove)) , tmp$1);
+  tmp$2 = this , (tmp$2.y$setter(tmp$3 = ADD$operator(tmp$2.y$getter(), lateralMove)) , tmp$3);
+}
+;
+unnamed24196b$Ant$Dart.prototype.appendMessage$member = function(message){
+  var tmp$1, tmp$0;
+  tmp$0 = htmld071c1$document$getter().query$named(1, $noargs, '#status') , (tmp$0.innerHTML$setter(tmp$1 = ADD$operator(tmp$0.innerHTML$getter(), '<br> ' + $toString(message) + '')) , tmp$1);
+}
+;
+unnamed24196b$Ant$Dart.prototype.initialMove$member = function(){
+  this.moveToRandomPosition$member();
+  this.board$getter().port$getter().toSendPort$named(0, $noargs).send$named(1, $noargs, unnamed24196b$PositionMessage$Dart.PositionMessage$$Factory(this.x$getter(), this.y$getter()));
+}
+;
+function unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted(message, replyTo){
+  var tmp$0;
+  if (EQ$operator(message, $Dart$Null)) {
+    this.port$getter().close$named(0, $noargs);
+  }
+   else {
+    if (!!(tmp$0 = message , tmp$0 != null && tmp$0.$implements$unnamed24196b$SniffMessage$Dart)) {
+      this.appendMessage$member('I found ' + $toString(message.sniff$getter()) + '');
+      this.moveToRandomPosition$member();
+      replyTo.send$named(1, $noargs, unnamed24196b$PositionMessage$Dart.PositionMessage$$Factory(this.x$getter(), this.y$getter()));
+    }
+  }
+}
+function unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted$named($n, $o, message, replyTo){
+  if ($o.count || $n != 2)
+    $nsme();
+  return unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted.call(this, message, replyTo);
+}
+function unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([RTT.dynamicType, SendPort$Dart.$lookupRTT()], RTT.dynamicType);
+}
+unnamed24196b$Ant$Dart.prototype.main$member = function(){
+  this.initialMove$member();
+  this.port$getter().receive$named(1, $noargs, $bind(unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted$named, unnamed24196b$Ant$Dart$main$c0$22_22$Hoisted$named$named_$lookupRTT, this));
+}
+;
+function unnamed24196b$Board$Dart(){
+}
+$inherits(unnamed24196b$Board$Dart, Isolate$Dart);
+function unnamed24196b$Board$Dart$isolateFactory(){
+  return unnamed24196b$Board$Dart.default$factory();
+}
+unnamed24196b$Board$Dart.prototype.getIsolateFactory = function(){
+  return unnamed24196b$Board$Dart$isolateFactory;
+}
+;
+unnamed24196b$Board$Dart.$lookupRTT = function(){
+  return RTT.create($cls('unnamed24196b$Board$Dart'), unnamed24196b$Board$Dart.$RTTimplements);
+}
+;
+unnamed24196b$Board$Dart.$RTTimplements = function(rtt){
+  unnamed24196b$Board$Dart.$addTo(rtt);
+}
+;
+unnamed24196b$Board$Dart.$addTo = function(target){
+  var rtt = unnamed24196b$Board$Dart.$lookupRTT();
+  target.implementedTypes[rtt.classKey] = rtt;
+  Isolate$Dart.$addTo(target);
+}
+;
+unnamed24196b$Board$Dart.$Constructor = function(){
+  Isolate$Dart.$Constructor.call(this);
+  var tmp$1, tmp$2, tmp$3, tmp$0;
+  this.cases$setter(tmp$0 = HashMapImplementation$Dart.HashMapImplementation$$Factory(HashMapImplementation$Dart.$lookupRTT())) , tmp$0;
+  {
+    var i = 0;
+    for (; LT$operator(i, this.height$getter()); tmp$1 = i , (i = ADD$operator(tmp$1, 1) , tmp$1)) {
+      {
+        var j = 0;
+        for (; LT$operator(j, this.widht$getter()); tmp$2 = j , (j = ADD$operator(tmp$2, 1) , tmp$2)) {
+          this.cases$getter().ASSIGN_INDEX$operator('' + $toString(i) + ' ' + $toString(j) + '', tmp$3 = 0) , tmp$3;
+        }
+      }
+    }
+  }
+}
+;
+unnamed24196b$Board$Dart.$Initializer = function(){
+  Isolate$Dart.$Initializer.call(this);
+  this.cases$field = $Dart$Null;
+  this.eatX$field = 10;
+  this.eatY$field = 10;
+  this.anthillX$field = 0;
+  this.anthillY$field = 0;
+  this.height$field = 10;
+  this.widht$field = 10;
+}
+;
+unnamed24196b$Board$Dart.Board$$Factory = function(){
+  var tmp$0 = new unnamed24196b$Board$Dart;
+  tmp$0.$typeInfo = unnamed24196b$Board$Dart.$lookupRTT();
+  unnamed24196b$Board$Dart.$Initializer.call(tmp$0);
+  unnamed24196b$Board$Dart.$Constructor.call(tmp$0);
+  return tmp$0;
+}
+;
+unnamed24196b$Board$Dart.default$factory = unnamed24196b$Board$Dart.Board$$Factory;
+unnamed24196b$Board$Dart.prototype.cases$getter = function(){
+  var tmp$0 = this.cases$field;
+  var tmp$1 = static$initializing;
+  if (tmp$0 === tmp$1)
+    throw 'circular initialization';
+  if (tmp$0 !== static$uninitialized)
+    return tmp$0;
+  this.cases$field = tmp$1;
+  var tmp$2 = $Dart$Null;
+  this.cases$field = tmp$2;
+  return tmp$2;
+}
+;
+unnamed24196b$Board$Dart.prototype.cases$setter = function(tmp$0){
+  this.cases$field = tmp$0;
+}
+;
+unnamed24196b$Board$Dart.prototype.eatX$getter = function(){
+  return 10;
+}
+;
+unnamed24196b$Board$Dart.prototype.eatY$getter = function(){
+  return 10;
+}
+;
+unnamed24196b$Board$Dart.prototype.anthillX$getter = function(){
+  return 0;
+}
+;
+unnamed24196b$Board$Dart.prototype.anthillY$getter = function(){
+  return 0;
+}
+;
+unnamed24196b$Board$Dart.prototype.height$getter = function(){
+  return 10;
+}
+;
+unnamed24196b$Board$Dart.prototype.widht$getter = function(){
+  return 10;
+}
+;
+unnamed24196b$Board$Dart.prototype.antMove$member = function(x, y){
+  var tmp$0;
+  var key = ListFactory$Dart.List$$Factory(null, $Dart$Null);
+  key.add$named(1, $noargs, x);
+  key.add$named(1, $noargs, y);
+  if (EQ$operator(this.eatX$getter(), x) && EQ$operator(this.eatY$getter(), y)) {
+    var strengh = this.cases$getter().remove$named(1, $noargs, key);
+    this.cases$getter().ASSIGN_INDEX$operator(key, tmp$0 = ADD$operator(strengh, 1)) , tmp$0;
+    return 'eat';
+  }
+   else {
+    if (EQ$operator(this.anthillX$getter(), x) && EQ$operator(this.anthillY$getter(), y)) {
+      return 'anthill';
+    }
+     else {
+      return 'nothing';
+    }
+  }
+}
+;
+function unnamed24196b$Board$Dart$main$c0$24_24$Hoisted(message, replyTo){
+  var tmp$0;
+  if (EQ$operator(message, $Dart$Null)) {
+    this.port$getter().close$named(0, $noargs);
+  }
+   else {
+    if (!!(tmp$0 = message , tmp$0 != null && tmp$0.$implements$unnamed24196b$PositionMessage$Dart)) {
+      replyTo.send$named(1, $noargs, unnamed24196b$SniffMessage$Dart.SniffMessage$$Factory(this.antMove$member(message.x$getter(), message.y$getter())));
+    }
+  }
+}
+function unnamed24196b$Board$Dart$main$c0$24_24$Hoisted$named($n, $o, message, replyTo){
+  if ($o.count || $n != 2)
+    $nsme();
+  return unnamed24196b$Board$Dart$main$c0$24_24$Hoisted.call(this, message, replyTo);
+}
+function unnamed24196b$Board$Dart$main$c0$24_24$Hoisted$named$named_$lookupRTT(){
+  return RTT.createFunction([RTT.dynamicType, SendPort$Dart.$lookupRTT()], RTT.dynamicType);
+}
+unnamed24196b$Board$Dart.prototype.main$member = function(){
+  this.port$getter().receive$named(1, $noargs, $bind(unnamed24196b$Board$Dart$main$c0$24_24$Hoisted$named, unnamed24196b$Board$Dart$main$c0$24_24$Hoisted$named$named_$lookupRTT, this));
+}
+;
 function unnamed24196b$DartedAnt$Dart(){
 }
 unnamed24196b$DartedAnt$Dart.$lookupRTT = function(){
@@ -48409,33 +52299,34 @@ unnamed24196b$DartedAnt$Dart.DartedAnt$$Factory = function(){
   return tmp$0;
 }
 ;
-function unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted(dartc_scp$3, message){
-  return dartc_scp$3.port.send$named(1, $noargs, message);
+unnamed24196b$DartedAnt$Dart.prototype.createAnts$member = function(nbOfAnts, board){
+  var tmp$0;
+  var antList = ListFactory$Dart.List$$Factory(null, $Dart$Null);
+  {
+    var i = 0;
+    for (; LT$operator(i, nbOfAnts); tmp$0 = i , (i = ADD$operator(tmp$0, 1) , tmp$0)) {
+      antList.add$named(1, $noargs, unnamed24196b$Ant$Dart.Ant$$Factory(board));
+    }
+  }
+  return antList;
 }
-function unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named($s0, $n, $o, message){
+;
+function unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted(ant){
+  return ant.spawn$named(0, $noargs);
+}
+function unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named($n, $o, ant){
   if ($o.count || $n != 1)
     $nsme();
-  return unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted($s0, message);
+  return unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted(ant);
 }
 function unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named$named_$lookupRTT(){
-  return RTT.createFunction([RTT.dynamicType], RTT.dynamicType);
-}
-function unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted(port){
-  var dartc_scp$3 = {port:port};
-  RTT.setTypeInfo(['Hello', 'from', 'other', 'isolate'], Array.$lookupRTT()).forEach$named(1, $noargs, $bind(unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named, unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named$named_$lookupRTT, $Dart$Null, dartc_scp$3));
-  dartc_scp$3.port.send$named(1, $noargs, $Dart$Null);
-}
-function unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted$named($n, $o, port){
-  if ($o.count || $n != 1)
-    $nsme();
-  return unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted(port);
-}
-function unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted$named$named_$lookupRTT(){
-  return RTT.createFunction([RTT.dynamicType], RTT.dynamicType);
+  return RTT.createFunction([unnamed24196b$Ant$Dart.$lookupRTT()], RTT.dynamicType);
 }
 unnamed24196b$DartedAnt$Dart.prototype.run$member = function(){
-  this.write$member('Hello World!');
-  unnamed24196b$Starter$Dart.Starter$$Factory().spawn$named(0, $noargs).then$named(1, $noargs, $bind(unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted$named, unnamed24196b$DartedAnt$Dart$run$c1$28_28$Hoisted$named$named_$lookupRTT, $Dart$Null));
+  var b = unnamed24196b$Board$Dart.Board$$Factory();
+  b.spawn$named(0, $noargs);
+  var ants = this.createAnts$member(10, b);
+  ants.forEach$named(1, $noargs, $bind(unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named, unnamed24196b$DartedAnt$Dart$run$c0$f$28_3_2$Hoisted$named$named_$lookupRTT, $Dart$Null));
 }
 ;
 unnamed24196b$DartedAnt$Dart.prototype.run$named = function($n, $o){
@@ -48444,80 +52335,74 @@ unnamed24196b$DartedAnt$Dart.prototype.run$named = function($n, $o){
   return unnamed24196b$DartedAnt$Dart.prototype.run$member.call(this);
 }
 ;
-unnamed24196b$DartedAnt$Dart.prototype.write$member = function(message){
-  var tmp$0;
-  htmld071c1$document$getter().query$named(1, $noargs, '#status').innerHTML$setter(tmp$0 = message) , tmp$0;
-}
-;
 function unnamed24196b$main$member(){
   unnamed24196b$DartedAnt$Dart.DartedAnt$$Factory().run$named(0, $noargs);
 }
-function unnamed24196b$Starter$Dart(){
+function unnamed24196b$PositionMessage$Dart(){
 }
-$inherits(unnamed24196b$Starter$Dart, Isolate$Dart);
-function unnamed24196b$Starter$Dart$isolateFactory(){
-  return unnamed24196b$Starter$Dart.default$factory();
-}
-unnamed24196b$Starter$Dart.prototype.getIsolateFactory = function(){
-  return unnamed24196b$Starter$Dart$isolateFactory;
+unnamed24196b$PositionMessage$Dart.$lookupRTT = function(){
+  return RTT.create($cls('unnamed24196b$PositionMessage$Dart'));
 }
 ;
-unnamed24196b$Starter$Dart.$lookupRTT = function(){
-  return RTT.create($cls('unnamed24196b$Starter$Dart'), unnamed24196b$Starter$Dart.$RTTimplements);
+unnamed24196b$PositionMessage$Dart.prototype.$implements$unnamed24196b$PositionMessage$Dart = 1;
+unnamed24196b$PositionMessage$Dart.$Constructor = function(x, y){
 }
 ;
-unnamed24196b$Starter$Dart.$RTTimplements = function(rtt){
-  unnamed24196b$Starter$Dart.$addTo(rtt);
+unnamed24196b$PositionMessage$Dart.$Initializer = function(x, y){
+  this.x$field = x;
+  this.y$field = y;
 }
 ;
-unnamed24196b$Starter$Dart.$addTo = function(target){
-  var rtt = unnamed24196b$Starter$Dart.$lookupRTT();
-  target.implementedTypes[rtt.classKey] = rtt;
-  Isolate$Dart.$addTo(target);
-}
-;
-function unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted(message, replyTo){
-  if (EQ$operator(message, $Dart$Null)) {
-    this.port$getter().close$named(0, $noargs);
-  }
-   else {
-    this.appendMessage$member(message);
-  }
-}
-function unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted$named($n, $o, message, replyTo){
-  if ($o.count || $n != 2)
-    $nsme();
-  return unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted.call(this, message, replyTo);
-}
-function unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted$named$named_$lookupRTT(){
-  return RTT.createFunction([RTT.dynamicType, RTT.dynamicType], RTT.dynamicType);
-}
-unnamed24196b$Starter$Dart.prototype.main$member = function(){
-  this.port$getter().receive$named(1, $noargs, $bind(unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted$named, unnamed24196b$Starter$Dart$main$c0$26_26$Hoisted$named$named_$lookupRTT, this));
-}
-;
-unnamed24196b$Starter$Dart.prototype.appendMessage$member = function(message){
-  var tmp$1, tmp$0;
-  tmp$0 = htmld071c1$document$getter().query$named(1, $noargs, '#status') , (tmp$0.innerHTML$setter(tmp$1 = ADD$operator(tmp$0.innerHTML$getter(), '<br> ' + $toString(message) + '')) , tmp$1);
-}
-;
-unnamed24196b$Starter$Dart.$Constructor = function(){
-  Isolate$Dart.$Constructor.call(this);
-}
-;
-unnamed24196b$Starter$Dart.$Initializer = function(){
-  Isolate$Dart.$Initializer.call(this);
-}
-;
-unnamed24196b$Starter$Dart.Starter$$Factory = function(){
-  var tmp$0 = new unnamed24196b$Starter$Dart;
-  tmp$0.$typeInfo = unnamed24196b$Starter$Dart.$lookupRTT();
-  unnamed24196b$Starter$Dart.$Initializer.call(tmp$0);
-  unnamed24196b$Starter$Dart.$Constructor.call(tmp$0);
+unnamed24196b$PositionMessage$Dart.PositionMessage$$Factory = function(x, y){
+  var tmp$0 = new unnamed24196b$PositionMessage$Dart;
+  tmp$0.$typeInfo = unnamed24196b$PositionMessage$Dart.$lookupRTT();
+  unnamed24196b$PositionMessage$Dart.$Initializer.call(tmp$0, x, y);
+  unnamed24196b$PositionMessage$Dart.$Constructor.call(tmp$0, x, y);
   return tmp$0;
 }
 ;
-unnamed24196b$Starter$Dart.default$factory = unnamed24196b$Starter$Dart.Starter$$Factory;
+unnamed24196b$PositionMessage$Dart.prototype.x$getter = function(){
+  return this.x$field;
+}
+;
+unnamed24196b$PositionMessage$Dart.prototype.x$setter = function(tmp$0){
+  this.x$field = tmp$0;
+}
+;
+unnamed24196b$PositionMessage$Dart.prototype.y$getter = function(){
+  return this.y$field;
+}
+;
+unnamed24196b$PositionMessage$Dart.prototype.y$setter = function(tmp$0){
+  this.y$field = tmp$0;
+}
+;
+function unnamed24196b$SniffMessage$Dart(){
+}
+unnamed24196b$SniffMessage$Dart.$lookupRTT = function(){
+  return RTT.create($cls('unnamed24196b$SniffMessage$Dart'));
+}
+;
+unnamed24196b$SniffMessage$Dart.prototype.$implements$unnamed24196b$SniffMessage$Dart = 1;
+unnamed24196b$SniffMessage$Dart.$Constructor = function(sniff){
+}
+;
+unnamed24196b$SniffMessage$Dart.$Initializer = function(sniff){
+  this.sniff$field = sniff;
+}
+;
+unnamed24196b$SniffMessage$Dart.SniffMessage$$Factory = function(sniff){
+  var tmp$0 = new unnamed24196b$SniffMessage$Dart;
+  tmp$0.$typeInfo = unnamed24196b$SniffMessage$Dart.$lookupRTT();
+  unnamed24196b$SniffMessage$Dart.$Initializer.call(tmp$0, sniff);
+  unnamed24196b$SniffMessage$Dart.$Constructor.call(tmp$0, sniff);
+  return tmp$0;
+}
+;
+unnamed24196b$SniffMessage$Dart.prototype.sniff$getter = function(){
+  return this.sniff$field;
+}
+;
 isolate$inits.push(function(){
   this._callback$$field_ = static$uninitialized;
   isolate$current.ReceivePortImpl$Dart_nextFreeId$$field_ = 1;

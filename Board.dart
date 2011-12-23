@@ -1,6 +1,6 @@
 class Board extends Isolate{
 
-  Map<List<int>, int> cases = null;
+  Map<String, int> cases = null;
   final int eatX = 10 ;
   final int eatY = 10 ;
   final int anthillX = 0;
@@ -9,15 +9,12 @@ class Board extends Isolate{
   final int widht  = 10;
 
   Board(){
+    this.cases= new Map();
     for(var i = 0; i<this.height;i++){  
       for(var j = 0; j<this.widht;j++){
-        List<int> key = new List();
-        key.add(i);
-        key.add(j);
-        this.cases[key]=0;
+        
+        this.cases["$i $j"]=0;
       }
-      Ant ant = new Ant(this);
-      ant.main();
     }
     
   }
@@ -34,6 +31,13 @@ class Board extends Isolate{
     }else return "nothing";
   }
   void main(){
-    
+    port.receive((message,SendPort replyTo){
+      if(message == null){
+        port.close();
+      }else{
+        if(message is PositionMessage)
+        replyTo.send(new SniffMessage(antMove(message.x,message.y)));
+      }
+    });
   }
 }
