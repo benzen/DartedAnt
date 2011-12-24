@@ -2,11 +2,13 @@
 class Ant extends Isolate {
   int x,y;
   Board board;
-  Ant(Board board){
-    this.board = board;
+ 
+  Ant(){
+//    this.board = board;
     this.x = 0;
     this.y = 0;
   }
+ 
   int randomPercentage() => ( Math.random()*100).toInt() ;
   moveToRandomPosition(){
      
@@ -29,21 +31,21 @@ class Ant extends Isolate {
   
   initialMove(){
     moveToRandomPosition();
-    board.port.toSendPort().send(new PositionMessage(this.x,this.y));
+    board.port.toSendPort().send(Message.position(this.x,this.y));
   }
   
   main() {
-    initialMove();
+   // initialMove();
     
     
     this.port.receive((var message, SendPort replyTo) {
       if(message == null){
         this.port.close();
       }else{
-        if(message is SniffMessage){     
-          appendMessage("I found ${message.sniff}");
+        if(message["id"] == MessageID.SNIFF){     
+          appendMessage("I found ${message["smelt"]}");
           moveToRandomPosition();
-          replyTo.send(new PositionMessage(this.x,this.y));
+          replyTo.send(Message.position(this.x,this.y));
         }
       }
     }

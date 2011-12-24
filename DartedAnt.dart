@@ -1,9 +1,9 @@
 #import('dart:html');
 #source('Ant.dart');
 #source('Board.dart');
-#source('Starter.dart');
-#source('PositionMessage.dart');  
-#source('SniffMessage.dart');
+#source('Starter.dart');  
+#source('Messages.dart');
+#source('Messages.dart');
 
 class DartedAnt {
 
@@ -14,7 +14,9 @@ class DartedAnt {
   createAnts(nbOfAnts, Board board){
     List<Ant> antList = new List();
     for(int i =0; i<nbOfAnts; i++){
-      antList.add(new Ant(board));
+      Ant ant = new Ant();
+      ant.board = board;
+      antList.add(ant);
     }  
     return antList;
   }
@@ -26,9 +28,15 @@ class DartedAnt {
 //      port.send(null);
 //    });
     Board b = new Board();
-    b.spawn();
-    var ants = createAnts(10,b);
-    ants.forEach( f(Ant ant) => ant.spawn() );
+    b.spawn().then((boardPort){
+      var ants = createAnts(10,b);
+      ants.forEach(  (ant) {
+        ant.spawn().then((antPort){
+          antPort.send(Message.sniff("nothing"),boardPort);  
+      }); 
+      });  
+    });
+    
   }
 
   void write(String message) {

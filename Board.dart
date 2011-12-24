@@ -30,13 +30,13 @@ class Board extends Isolate{
       return "anthill";
     }else return "nothing";
   }
-  void main(){
+  main(){
     port.receive((message,SendPort replyTo){
       if(message == null){
         port.close();
       }else{
-        if(message is PositionMessage)
-        replyTo.send(new SniffMessage(antMove(message.x,message.y)));
+        if(message["id"] == MessageID.POSITION)
+        replyTo.send(Message.sniff(antMove(message["x"],message["y"])));
       }
     });
   }
