@@ -1,9 +1,12 @@
 main(){
   writeln("testrunner");
- 
-  var tests = {"TestAnt":new TestAnt()};
-  tests.forEach( ( testName, testInstance ) => executeTest(testName,testInstance ) );
-  
+  try{
+    var tests = {"TestAnt":new TestAnt()};
+    tests.forEach( ( testName, testInstance ) => executeTest(testName,testInstance ) );
+  }catch(Exception e){
+    writeln("Fails");
+    write("<h1> <font color='red'>${e.toString()} </font></h1>");
+  }
 }
 
 void executeTest(testName, testInstance){

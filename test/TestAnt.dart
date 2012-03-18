@@ -9,7 +9,7 @@ class TestAnt extends TestCase{
   }
   
   testInitialization(){
-    Expect.equals(0,ant.x);
+    Expect.equals(10,ant.x);
     Expect.equals(0, ant.y);
   }
   testRandomPercentage(){
