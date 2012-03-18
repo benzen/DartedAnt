@@ -38,7 +38,7 @@ class Board extends Isolate{
         port.close();
       }else{
         if(message["id"] == MessageID.POSITION)
-        replyTo.send(Message.sniff(antMove(message["x"],message["y"])));
+        replyTo.send(new Message.sniff(antMove(message["x"],message["y"])));
       }
     });
   }

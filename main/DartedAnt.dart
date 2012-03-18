@@ -15,7 +15,7 @@ class DartedAnt {
       var ants = createAnts(Config.nbAnts);
       ants.forEach(  (ant) {
         ant.spawn().then( (SendPort antPort){
-          antPort.send(Message.sniff("nothing"), boardPort);
+          antPort.send(new Message.sniff("nothing"), boardPort);
 
         });
       });

@@ -1,13 +1,13 @@
 
 class MessageID{
-  static final POSITION= "positwion";
+  static final POSITION= "positsion";
   static final SNIFF = "sniff";
 }
 class Message{
-  static position(int x, int y){
+  factory Message.position(int x, int y){
     return { "id":MessageID.POSITION,"x":x,"y":y};
   }
-  static sniff(smelt){
+  factory Message.sniff(smelt){
     return {"id":MessageID.SNIFF,"smelt":smelt};
   }
 }

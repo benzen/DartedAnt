@@ -38,7 +38,7 @@ class Ant extends Isolate {
           appendMessage("At position (x:${this.x},y:${this.y}) I found ${message["smelt"]}");
           moveToRandomPosition();
           appendMessage("new position ${this.x}, ${this.y}");
-          replyTo.send(Message.position(this.x,this.y));
+          replyTo.send(new Message.position(this.x,this.y));
         }
       }
     }
