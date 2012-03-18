@@ -1,12 +1,14 @@
+
+
 class Board extends Isolate{
 
   Map<String, int> cases = null;
-  final int eatX = 10 ;
-  final int eatY = 10 ;
-  final int anthillX = 0;
-  final int anthillY = 0;
-  final int height = 10;
-  final int widht  = 10;
+  final int eatX = Config.eatX ;
+  final int eatY = Config.eatY ;
+  final int anthillX = Config.anthillX;
+  final int anthillY = Config.anthilly;
+  final int height = Config.boardBoundX;
+  final int widht  = Config.boardBoundY;
 
   Board(){
     this.cases= new Map();

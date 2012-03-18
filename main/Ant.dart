@@ -1,10 +1,9 @@
 
 class Ant extends Isolate {
   int x,y;
-  Board board;
  
   Ant(){
-//    this.board = board;
+
     this.x = 0;
     this.y = 0;
   }
@@ -17,10 +16,9 @@ class Ant extends Isolate {
      
      var lateralMove = (leftOrRight>50)?1:-1;
      var frontMove = frontOrBack>50?1:-1;
-     
+
      this.x += frontMove;
      this.y += lateralMove;
-     
      
   }
   
@@ -29,22 +27,17 @@ class Ant extends Isolate {
     document.query('#status').innerHTML += "<br> $message";
   }
   
-  initialMove(){
-    moveToRandomPosition();
-    board.port.toSendPort().send(Message.position(this.x,this.y));
-  }
   
   main() {
-   // initialMove();
-    
-    
+  
     this.port.receive((var message, SendPort replyTo) {
       if(message == null){
         this.port.close();
       }else{
         if(message["id"] == MessageID.SNIFF){     
-          appendMessage("I found ${message["smelt"]}");
+          appendMessage("At position (x:${this.x},y:${this.y}) I found ${message["smelt"]}");
           moveToRandomPosition();
+          appendMessage("new position ${this.x}, ${this.y}");
           replyTo.send(Message.position(this.x,this.y));
         }
       }
